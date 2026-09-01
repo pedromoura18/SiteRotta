@@ -1,0 +1,32 @@
+<svg width="1200" height="420" viewBox="0 0 1200 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rottaGrad" x1="110" y1="70" x2="860" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2CE3FD"/>
+      <stop offset="1" stop-color="#3568FD"/>
+    </linearGradient>
+    <linearGradient id="rottaGradDark" x1="40" y1="20" x2="320" y2="320" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2CE3FD"/>
+      <stop offset="1" stop-color="#1A68FF"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(40 28)">
+    <path d="M105 0L250 0L250 145L191 145L191 59L105 59V0Z" fill="url(#rottaGradDark)"/>
+    <path d="M0 0L145 0L145 59L59 59L59 145L0 145V0Z" fill="url(#rottaGradDark)"/>
+    <path d="M0 145L59 145L59 250L145 250V310L0 310V145Z" fill="url(#rottaGradDark)"/>
+    <path d="M191 145L250 145L250 310L105 310L105 250L191 250V145Z" fill="url(#rottaGradDark)"/>
+
+    <path d="M62 0L112 50L62 100L12 50L62 0Z" fill="url(#rottaGrad)" opacity="0.96"/>
+    <path d="M191 0L242 50L191 100L143 50L191 0Z" fill="url(#rottaGrad)" opacity="0.96"/>
+    <path d="M62 145L112 195L62 245L12 195L62 145Z" fill="url(#rottaGrad)" opacity="0.96"/>
+    <path d="M191 145L242 195L191 245L143 195L191 145Z" fill="url(#rottaGrad)" opacity="0.96"/>
+
+    <path d="M108 58L176 58L176 96L145 96L145 125L108 125L108 58Z" fill="#0E1332" opacity="0.82"/>
+    <path d="M62 126L106 170L62 214L19 170L62 126Z" fill="#0E1332" opacity="0.82"/>
+    <path d="M191 126L235 170L191 214L147 170L191 126Z" fill="#0E1332" opacity="0.82"/>
+  </g>
+
+  <g transform="translate(340 78)">
+    <text x="0" y="200" fill="url(#rottaGrad)" font-family="'Segoe UI', Arial, sans-serif" font-size="270" font-weight="900" letter-spacing="-18">rotta</text>
+  </g>
+</svg>
