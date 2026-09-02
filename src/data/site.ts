@@ -118,7 +118,7 @@ export const services = [
   },
 ]
 
-export type ProductCategory = 'all' | 'outsourcing' | 'automacao' | 'hardware' | 'infra'
+export type ProductCategory = 'all' | 'outsourcing' | 'automacao' | 'hardware' | 'redes' | 'infra'
 
 export interface ProductItem {
   id: string
