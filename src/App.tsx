@@ -24,6 +24,7 @@ import { ContactForm } from './components/ContactForm'
 import { FaqSection } from './components/FaqSection'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
+import { partnerBrandList } from './components/PartnerLogos'
 import { ProductCatalog } from './components/ProductCatalog'
 import { RoiCalculator } from './components/RoiCalculator'
 import { WhatsAppFloat } from './components/WhatsAppFloat'
@@ -31,7 +32,6 @@ import {
   companyInfo,
   differentiators,
   metrics,
-  partnerBrands,
   pillars,
   segments,
   services,
@@ -265,15 +265,15 @@ function App() {
                       </div>
                     </div>
 
-                    <div className="mt-8 pt-4 border-t border-white/10">
+                    <div className="mt-8 pt-5 border-t border-white/10">
                       <a
                         href={companyInfo.whatsappUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 py-3 text-sm font-bold text-white hover:bg-gradient-to-r hover:from-rotta-cyan hover:to-rotta-blue hover:text-rotta-darkest hover:shadow-glow transition-all"
+                        className="group/btn inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rotta-cyan/20 to-rotta-blue/20 border border-rotta-cyan/40 px-4 py-3.5 text-sm font-bold text-white transition-all duration-300 hover:from-rotta-cyan hover:to-rotta-blue hover:text-rotta-darkest hover:border-transparent hover:shadow-glow active:scale-[0.99]"
                       >
-                        <span>Solicitar Proposta para {pillar.title}</span>
-                        <ArrowRight size={15} />
+                        <span>Solicitar Proposta</span>
+                        <ArrowRight size={16} className="transition-transform duration-300 group-hover/btn:translate-x-1" />
                       </a>
                     </div>
                   </div>
@@ -420,7 +420,7 @@ function App() {
            ========================================= */}
         <section className="py-16 bg-rotta-darkest border-y border-white/10">
           <div className="container-shell">
-            <div className="text-center mb-8">
+            <div className="text-center mb-10">
               <p className="text-xs font-bold uppercase tracking-[0.25em] text-rotta-cyan">
                 Marcas Líderes Homologadas
               </p>
@@ -431,21 +431,19 @@ function App() {
 
             <div className="brand-marquee">
               <div className="brand-track">
-                {[...partnerBrands, ...partnerBrands].map((brand, idx) => (
-                  <div key={`${brand.name}-${idx}`} className="brand-item">
-                    {brand.logo ? (
-                      <img
-                        src={brand.logo}
-                        alt={brand.name}
-                        className="h-8 max-w-[120px] object-contain opacity-80 hover:opacity-100 transition-opacity filter brightness-125"
-                      />
-                    ) : (
-                      <span className="font-black tracking-wider text-sm text-white">
-                        {brand.mark}
-                      </span>
-                    )}
-                  </div>
-                ))}
+                {[...partnerBrandList, ...partnerBrandList].map((brand, idx) => {
+                  const LogoComponent = brand.Component
+                  return (
+                    <div
+                      key={`${brand.id}-${idx}`}
+                      className="brand-item group flex items-center justify-center px-6 py-4 rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-md transition-all duration-300 hover:border-rotta-cyan/50 hover:bg-white/[0.08]"
+                    >
+                      <div className="text-slate-300 transition-colors duration-300 group-hover:text-rotta-cyan">
+                        <LogoComponent className="h-7 sm:h-8 max-w-[130px] w-auto" />
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>
