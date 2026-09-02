@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" role="img" aria-label="Honeywell logo">
+  <rect width="900" height="300" fill="#ffffff"/>
+  <rect x="30" y="30" width="90" height="190" fill="#e11d2e"/>
+  <rect x="160" y="30" width="90" height="190" fill="#e11d2e"/>
+  <rect x="290" y="30" width="90" height="190" fill="#e11d2e"/>
+  <text x="450" y="190" font-size="150" font-family="Arial, Helvetica, sans-serif" font-weight="700" fill="#e11d2e">Honeywell</text>
+</svg>

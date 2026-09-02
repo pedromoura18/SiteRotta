@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Zebra logo">
+  <rect width="600" height="600" fill="#ffffff"/>
+  <g fill="#000000">
+    <path d="M76 76l110 0 172 172-83 0-58-58-84 84 0-84-57 0 0-114zm176 118l86 0 60 60-86 0-60-60zm72 150l154 0 0 114-130 0-48-48 24-66zm-90 0l0 114-145 0 0-114 58 0 87 0zm-174-26l0-124-82 0 0 124 82 0zm178-162l0-76 94 0 0 76-94 0z"/>
+    <path d="M90 130h30v300H90zm78-42h30v384h-30zm86 52h30v300h-30zm86-42h30v384h-30zm86 52h30v300h-30z"/>
+  </g>
+</svg>

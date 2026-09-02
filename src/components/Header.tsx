@@ -1,71 +1,138 @@
-import { ArrowRight, Menu, PhoneCall } from 'lucide-react'
-
+import { useState } from 'react'
+import { ArrowRight, Clock, MapPin, Menu, PhoneCall, X } from 'lucide-react'
 import { BrandMark } from './BrandMark'
+import { companyInfo } from '../data/site'
 
 const navItems = [
-  { label: 'Home', href: '#top' },
-  { label: 'Institucional', href: '#sobre' },
-  { label: 'Serviços', href: '#solucoes' },
-  { label: 'Produtos', href: '#cases' },
-  { label: 'Soluções', href: '#processo' },
+  { label: 'Início', href: '#inicio' },
+  { label: 'Pilares', href: '#pilares' },
+  { label: 'Soluções', href: '#solucoes' },
+  { label: 'Produtos', href: '#produtos' },
+  { label: 'Simulador ROI', href: '#calculadora' },
+  { label: 'Diferenciais', href: '#diferenciais' },
   { label: 'Contato', href: '#contato' },
 ]
 
 export function Header() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   return (
     <>
-      <div className="hidden border-b border-slate-200 bg-slate-950 px-4 py-2 text-xs text-slate-300 md:block">
+      {/* Topbar Institucional */}
+      <div className="hidden border-b border-white/10 bg-rotta-darkest/90 px-4 py-2 text-xs text-slate-300 backdrop-blur-md md:block">
         <div className="container-shell flex items-center justify-between gap-4">
-          <div className="flex items-center gap-5">
-            <a href="tel:554688037656" className="inline-flex items-center gap-2 text-slate-200 transition hover:text-white">
-              <PhoneCall size={14} className="text-cyan-300" />
-              (46) 98803-7656
+          <div className="flex items-center gap-6">
+            <a
+              href="tel:5546988037656"
+              className="inline-flex items-center gap-2 font-medium text-slate-200 transition-colors hover:text-rotta-cyan"
+            >
+              <PhoneCall size={14} className="text-rotta-cyan" />
+              <span>(46) 98803-7656</span>
             </a>
-            <span>Segunda a Sexta: 8h às 18h</span>
+
+            <div className="inline-flex items-center gap-1.5 text-slate-400">
+              <MapPin size={13} className="text-rotta-cyan" />
+              <span>Francisco Beltrão - PR</span>
+            </div>
+
+            <div className="inline-flex items-center gap-1.5 text-slate-400">
+              <Clock size={13} className="text-rotta-cyan" />
+              <span>Seg - Sex: 8h às 18h</span>
+            </div>
           </div>
-          <span className="uppercase tracking-[0.28em] text-cyan-300">Automação Comercial | Outsourcing | Manutenção Técnica</span>
+
+          <div className="flex items-center gap-4">
+            <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-rotta-cyan">
+              Solução • Inovação • Compromisso
+            </span>
+          </div>
         </div>
       </div>
 
-      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl">
-        <div className="container-shell flex items-center justify-between py-4">
-          <a href="#top" className="flex items-center gap-3" aria-label="Rotta Tecnologia homepage">
-            <BrandMark className="h-12 w-12 shrink-0" />
-            <div className="hidden sm:block">
-              <p className="text-[1.7rem] font-black leading-none tracking-[-0.07em] text-slate-900">ROTTA</p>
-              <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.28em] text-slate-500">Tecnologia</p>
-            </div>
+      {/* Header Sticky Glassmorphic */}
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-rotta-navy/85 backdrop-blur-xl shadow-lg transition-all duration-300">
+        <div className="container-shell flex items-center justify-between py-3.5 sm:py-4">
+          {/* Logotipo Rotta */}
+          <a
+            href="#inicio"
+            className="group flex items-center gap-3 transition-transform hover:scale-[1.02]"
+            aria-label="Rotta Tecnologia"
+          >
+            <BrandMark className="h-10 sm:h-12 w-auto" variant="horizontal" theme="gradient" />
           </a>
 
-          <nav className="hidden items-center gap-7 text-sm font-medium text-slate-600 lg:flex">
+          {/* Menu Desktop */}
+          <nav className="hidden items-center gap-6 text-sm font-semibold text-slate-200 lg:flex xl:gap-8">
             {navItems.map((item) => (
-              <a key={item.href} href={item.href} className="transition hover:text-slate-900">
+              <a
+                key={item.href}
+                href={item.href}
+                className="relative py-1 text-slate-300 transition-colors duration-200 hover:text-rotta-cyan after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-rotta-cyan after:transition-all after:duration-300 hover:after:w-full"
+              >
                 {item.label}
               </a>
             ))}
           </nav>
 
+          {/* CTA & Mobile Hamburger */}
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white p-2 text-slate-700 lg:hidden"
-              aria-label="Abrir menu"
-            >
-              <Menu size={18} />
-            </button>
-
             <a
-              href="https://api.whatsapp.com/send?phone=554688037656"
+              href={companyInfo.whatsappUrl}
               target="_blank"
               rel="noreferrer"
-              className="hidden items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 sm:inline-flex"
+              className="hidden sm:inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-rotta-cyan via-rotta-blue-light to-rotta-blue px-5 py-2.5 text-xs sm:text-sm font-bold text-rotta-darkest shadow-glow transition-all duration-300 hover:shadow-glow-lg hover:brightness-110 hover:-translate-y-0.5"
             >
-              Fale conosco
-              <ArrowRight size={16} />
+              <span>Orçamento Rápido</span>
+              <ArrowRight size={15} />
             </a>
+
+            {/* Mobile Menu Button */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 p-2.5 text-slate-200 transition-colors hover:border-rotta-cyan/40 hover:bg-white/10 lg:hidden"
+              aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
+            >
+              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div className="border-b border-white/10 bg-rotta-darkest/95 px-6 py-6 backdrop-blur-2xl lg:hidden animate-fade-in-up">
+            <nav className="flex flex-col space-y-4">
+              {navItems.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-lg px-3 py-2 text-base font-medium text-slate-200 transition-colors hover:bg-white/5 hover:text-rotta-cyan"
+                >
+                  {item.label}
+                </a>
+              ))}
+              <div className="pt-4 border-t border-white/10">
+                <a
+                  href={companyInfo.whatsappUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rotta-cyan to-rotta-blue py-3 text-center text-sm font-bold text-rotta-darkest shadow-glow"
+                >
+                  <span>Falar no WhatsApp</span>
+                  <ArrowRight size={16} />
+                </a>
+                <div className="mt-4 text-center text-xs text-slate-400">
+                  <p>Atendimento direto com Douglas Rotta</p>
+                  <p className="mt-1 font-semibold text-rotta-cyan">(46) 98803-7656</p>
+                </div>
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
     </>
   )
 }
+
