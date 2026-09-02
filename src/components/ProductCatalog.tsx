@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowRight, Check, Layers, MessageSquare, Monitor, Network, Printer, ShoppingBag, Store } from 'lucide-react'
+import { ArrowRight, Check, Layers, MessageSquare, Monitor, Network, Printer, Server, ShoppingBag, Store } from 'lucide-react'
 import { companyInfo, productsData } from '../data/site'
 import type { ProductCategory, ProductItem } from '../data/site'
 
@@ -7,8 +7,9 @@ const categories: { id: ProductCategory; label: string; icon: React.ElementType 
   { id: 'all', label: 'Todos os Equipamentos', icon: Layers },
   { id: 'outsourcing', label: 'Outsourcing de Impressão', icon: Printer },
   { id: 'automacao', label: 'Automação & PDVs', icon: Store },
-  { id: 'hardware', label: 'Computadores & Servidores', icon: Monitor },
-  { id: 'redes', label: 'Redes & Segurança', icon: Network },
+  { id: 'hardware', label: 'Computadores & Notebooks', icon: Monitor },
+  { id: 'infra', label: 'Servidores & TI', icon: Server },
+  { id: 'redes', label: 'Redes & Infraestrutura', icon: Network },
 ]
 
 export function ProductCatalog() {
