@@ -6,8 +6,8 @@
   font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.6;
   font-weight: 400;
-  color: #1e293b;
-  background: #25174E;
+  color: #0f172a;
+  background-color: #f8fafc;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -22,7 +22,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: #25174E;
+  background-color: #f8fafc;
+  color: #0f172a;
   overflow-x: hidden;
 }
 
@@ -37,6 +38,17 @@ body {
 }
 
 /* Custom Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes fade-in-up {
   from {
     opacity: 0;
@@ -77,52 +89,52 @@ body {
   }
 }
 
+.animate-fadeIn {
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 @layer components {
   .container-shell {
     @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
   }
 
-  .glass-card-dark {
-    @apply bg-white/[0.04] border border-white/10 backdrop-blur-md;
+  .card-light {
+    @apply bg-white border border-slate-200/90 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300;
   }
 
-  .glass-card-light {
-    @apply bg-white/90 border border-slate-200/80 backdrop-blur-md shadow-card;
+  .glass-header {
+    @apply bg-white/95 border-b border-slate-200/80 backdrop-blur-md;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rotta-cyan via-rotta-cyan-dark to-rotta-blue px-6 py-3.5 text-sm sm:text-base font-bold text-rotta-darkest shadow-glow transition-all duration-300 hover:shadow-glow-lg hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rotta-blue to-rotta-blue-dark px-6 py-3 text-sm sm:text-base font-bold text-white shadow-md transition-all duration-300 hover:shadow-lg hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-6 py-3.5 text-sm sm:text-base font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/20 hover:border-rotta-cyan/40 hover:-translate-y-0.5 active:translate-y-0;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm sm:text-base font-semibold text-slate-800 transition-all duration-300 hover:bg-slate-50 hover:border-rotta-blue hover:text-rotta-blue hover:-translate-y-0.5 active:translate-y-0;
   }
 
-  .btn-outline-blue {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border-2 border-rotta-blue bg-rotta-blue/5 px-6 py-3.5 text-sm sm:text-base font-bold text-rotta-blue transition-all duration-300 hover:bg-rotta-blue hover:text-white hover:shadow-glow-blue hover:-translate-y-0.5;
-  }
-
-  .text-gradient-cyan {
-    @apply bg-gradient-to-r from-rotta-cyan via-white to-rotta-cyan bg-clip-text text-transparent;
+  .btn-whatsapp {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm sm:text-base font-bold text-white shadow-sm transition-all duration-300 hover:bg-emerald-700 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0;
   }
 
   .text-gradient-brand {
-    @apply bg-gradient-to-r from-rotta-cyan via-rotta-blue-light to-rotta-blue bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-rotta-navy via-rotta-blue to-rotta-blue-dark bg-clip-text text-transparent;
   }
 }
 
 /* Brand Marquee Infinite Carousel */
 .brand-marquee {
   overflow: hidden;
-  mask-image: linear-gradient(90deg, transparent, black 15%, black 85%, transparent);
-  -webkit-mask-image: linear-gradient(90deg, transparent, black 15%, black 85%, transparent);
+  mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
 }
 
 .brand-track {
   display: flex;
   width: max-content;
   gap: 1.5rem;
-  animation: marquee 28s linear infinite;
+  animation: marquee 32s linear infinite;
 }
 
 .brand-track:hover {
@@ -137,16 +149,16 @@ body {
   height: 80px;
   padding: 0.75rem 1.5rem;
   border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(37, 23, 78, 0.5);
-  backdrop-filter: blur(12px);
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .brand-item:hover {
-  border-color: rgba(44, 227, 253, 0.4);
+  border-color: #3568FD;
   transform: translateY(-2px);
-  background: rgba(53, 104, 253, 0.2);
+  box-shadow: 0 8px 20px rgba(53, 104, 253, 0.12);
 }
 
 /* Custom Scrollbar */
@@ -155,15 +167,14 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #160D33;
+  background: #f1f5f9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #382375;
+  background: #cbd5e1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3568FD;
+  background: #94a3b8;
 }
-

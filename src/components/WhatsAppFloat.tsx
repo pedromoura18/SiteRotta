@@ -9,19 +9,19 @@ export function WhatsAppFloat() {
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       {/* Tooltip Popup */}
       {showTooltip && (
-        <div className="relative mb-3 flex items-center gap-2 rounded-2xl border border-white/20 bg-rotta-darkest/95 p-3.5 pr-8 text-xs font-semibold text-white shadow-2xl backdrop-blur-xl animate-fade-in-up">
+        <div className="relative mb-3 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 pr-8 text-xs font-semibold text-slate-800 shadow-xl animate-fadeIn">
           <button
             type="button"
             onClick={() => setShowTooltip(false)}
-            className="absolute right-2 top-2 text-slate-400 hover:text-white"
+            className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-700"
             aria-label="Fechar aviso"
           >
             <X size={14} />
           </button>
-          <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
+          <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
           <div>
-            <p className="font-bold text-rotta-cyan">Atendimento Direto</p>
-            <p className="text-[11px] text-slate-300">Converse com Douglas Rotta no WhatsApp</p>
+            <p className="font-bold text-slate-900">Atendimento Ativo</p>
+            <p className="text-[11px] text-slate-500">Converse com Douglas Rotta no WhatsApp</p>
           </div>
         </div>
       )}
@@ -31,7 +31,7 @@ export function WhatsAppFloat() {
         href={companyInfo.whatsappUrl}
         target="_blank"
         rel="noreferrer"
-        className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-emerald-600 via-emerald-500 to-rotta-cyan text-white shadow-glow-lg transition-all duration-300 hover:scale-110 active:scale-95"
+        className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition-all duration-300 hover:scale-110 hover:bg-emerald-700 active:scale-95"
         aria-label="Falar no WhatsApp com Rotta Tecnologia"
       >
         <span className="absolute inset-0 rounded-full bg-emerald-400 opacity-40 animate-ping pointer-events-none" />

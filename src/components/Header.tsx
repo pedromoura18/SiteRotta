@@ -1,132 +1,218 @@
 import { useState } from 'react'
-import { ArrowRight, Clock, MapPin, Menu, PhoneCall, X } from 'lucide-react'
+import {
+  Building2,
+  ChevronRight,
+  ExternalLink,
+  Home,
+  Layers,
+  Mail,
+  MapPin,
+  Menu,
+  MessageCircle,
+  PhoneCall,
+  User,
+  Wrench,
+  X,
+} from 'lucide-react'
 import { BrandMark } from './BrandMark'
 import { companyInfo } from '../data/site'
 
-const navItems = [
-  { label: 'Início', href: '#inicio' },
-  { label: 'Pilares', href: '#pilares' },
-  { label: 'Soluções', href: '#solucoes' },
-  { label: 'Produtos', href: '#produtos' },
-  { label: 'Simulador ROI', href: '#calculadora' },
-  { label: 'Diferenciais', href: '#diferenciais' },
-  { label: 'Contato', href: '#contato' },
+export type NavPage = 'home' | 'sobre' | 'servicos' | 'produtos' | 'contato'
+
+interface HeaderProps {
+  currentPage: NavPage
+  onNavigate: (page: NavPage) => void
+}
+
+const navItems: { id: NavPage; label: string; icon: React.ElementType }[] = [
+  { id: 'home', label: 'Início', icon: Home },
+  { id: 'sobre', label: 'Sobre Nós', icon: Building2 },
+  { id: 'servicos', label: 'Serviços', icon: Wrench },
+  { id: 'produtos', label: 'Produtos', icon: Layers },
+  { id: 'contato', label: 'Contato', icon: PhoneCall },
 ]
 
-export function Header() {
+export function Header({ currentPage, onNavigate }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const handleNavClick = (page: NavPage) => {
+    onNavigate(page)
+    setMobileMenuOpen(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   return (
     <>
-      {/* Topbar Institucional */}
-      <div className="hidden border-b border-white/10 bg-rotta-darkest/90 px-4 py-2 text-xs text-slate-300 backdrop-blur-md md:block">
+      {/* ─── Topbar Institucional com Contato e Área do Cliente ─── */}
+      <div className="hidden border-b border-slate-200/80 bg-slate-50 px-4 py-2 text-xs text-slate-600 md:block">
         <div className="container-shell flex items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             <a
               href="tel:5546988037656"
-              className="inline-flex items-center gap-2 font-medium text-slate-200 transition-colors hover:text-rotta-cyan"
+              className="inline-flex items-center gap-2 font-semibold text-slate-700 transition-colors hover:text-rotta-blue"
             >
-              <PhoneCall size={14} className="text-rotta-cyan" />
-              <span>(46) 98803-7656</span>
+              <PhoneCall size={14} className="text-rotta-blue" />
+              <span>(46) 9 8803-7656</span>
             </a>
 
-            <div className="inline-flex items-center gap-1.5 text-slate-400">
-              <MapPin size={13} className="text-rotta-cyan" />
-              <span>Francisco Beltrão - PR</span>
-            </div>
+            <a
+              href="mailto:atendimento@rottatecnologia.com.br"
+              className="inline-flex items-center gap-2 text-slate-600 transition-colors hover:text-rotta-blue"
+            >
+              <Mail size={14} className="text-rotta-blue" />
+              <span>atendimento@rottatecnologia.com.br</span>
+            </a>
 
-            <div className="inline-flex items-center gap-1.5 text-slate-400">
-              <Clock size={13} className="text-rotta-cyan" />
-              <span>Seg - Sex: 8h às 18h</span>
+            <div className="inline-flex items-center gap-1.5 text-slate-500">
+              <MapPin size={14} className="text-rotta-blue" />
+              <span>Francisco Beltrão - PR</span>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-rotta-cyan">
-              Solução • Inovação • Compromisso
+            <span className="hidden lg:inline text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Seg - Sex: 8h às 18h
             </span>
+            <div className="h-3 w-px bg-slate-200 hidden lg:block" />
+            <a
+              href={companyInfo.clientPortalUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white border border-slate-200 px-3 py-1 font-bold text-slate-700 shadow-2xs transition-all hover:border-rotta-blue hover:text-rotta-blue"
+            >
+              <User size={13} className="text-rotta-blue" />
+              <span>Área do Cliente</span>
+              <ExternalLink size={11} className="text-slate-400" />
+            </a>
           </div>
         </div>
       </div>
 
-      {/* Header Sticky Glassmorphic */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-rotta-navy/85 backdrop-blur-xl shadow-lg transition-all duration-300">
-        <div className="container-shell flex items-center justify-between py-3.5 sm:py-4">
+      {/* ─── Header Principal (Ampliado, Claro e com Ícones Maiores) ─── */}
+      <header className="sticky top-0 z-50 border-b border-slate-200/90 bg-white/95 backdrop-blur-xl shadow-xs transition-all duration-300">
+        <div className="container-shell flex h-20 items-center justify-between">
           {/* Logotipo Rotta */}
-          <a
-            href="#inicio"
-            className="group flex items-center gap-3 transition-transform hover:scale-[1.02]"
-            aria-label="Rotta Tecnologia"
+          <button
+            type="button"
+            onClick={() => handleNavClick('home')}
+            className="group flex items-center gap-3 transition-transform hover:scale-[1.02] text-left focus:outline-none"
+            aria-label="Voltar para a página inicial"
           >
-            <BrandMark className="h-10 sm:h-12 w-auto" variant="horizontal" theme="gradient" />
-          </a>
+            <BrandMark className="h-11 sm:h-12 w-auto" variant="horizontal" theme="dark" />
+          </button>
 
-          {/* Menu Desktop */}
-          <nav className="hidden items-center gap-6 text-sm font-semibold text-slate-200 lg:flex xl:gap-8">
-            {navItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="relative py-1 text-slate-300 transition-colors duration-200 hover:text-rotta-cyan after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-rotta-cyan after:transition-all after:duration-300 hover:after:w-full"
-              >
-                {item.label}
-              </a>
-            ))}
+          {/* Menu Desktop com Ícones Grandes e Claros */}
+          <nav className="hidden items-center gap-1.5 lg:flex xl:gap-2">
+            {navItems.map((item) => {
+              const Icon = item.icon
+              const isActive = currentPage === item.id
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleNavClick(item.id)}
+                  className={`inline-flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm sm:text-[15px] font-bold transition-all duration-200 ${
+                    isActive
+                      ? 'bg-blue-50 text-rotta-blue shadow-xs'
+                      : 'text-slate-700 hover:bg-slate-100/80 hover:text-rotta-navy'
+                  }`}
+                >
+                  <Icon
+                    size={20}
+                    className={`transition-colors ${
+                      isActive ? 'text-rotta-blue' : 'text-slate-500 group-hover:text-slate-700'
+                    }`}
+                  />
+                  <span>{item.label}</span>
+                </button>
+              )
+            })}
           </nav>
 
-          {/* CTA & Mobile Hamburger */}
+          {/* Botões de Ação Direta */}
           <div className="flex items-center gap-3">
+            <a
+              href={companyInfo.clientPortalUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden xl:inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-2.5 text-xs font-bold text-slate-700 transition-all hover:bg-slate-100 hover:text-rotta-blue"
+            >
+              <User size={16} className="text-rotta-blue" />
+              <span>Portal do Cliente</span>
+            </a>
+
             <a
               href={companyInfo.whatsappUrl}
               target="_blank"
               rel="noreferrer"
-              className="hidden sm:inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-rotta-cyan via-rotta-blue-light to-rotta-blue px-5 py-2.5 text-xs sm:text-sm font-bold text-rotta-darkest shadow-glow transition-all duration-300 hover:shadow-glow-lg hover:brightness-110 hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-rotta-blue to-rotta-blue-dark px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:brightness-105 active:scale-95"
             >
-              <span>Orçamento Rápido</span>
-              <ArrowRight size={15} />
+              <MessageCircle size={17} className="text-white" />
+              <span className="hidden sm:inline">Solicitar Orçamento</span>
+              <span className="sm:hidden">Orçamento</span>
             </a>
 
-            {/* Mobile Menu Button */}
+            {/* Botão Hamburger Mobile */}
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 p-2.5 text-slate-200 transition-colors hover:border-rotta-cyan/40 hover:bg-white/10 lg:hidden"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-slate-700 transition-colors hover:bg-slate-100 hover:text-rotta-blue lg:hidden"
               aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
             >
-              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation Drawer */}
+        {/* ─── Drawer Mobile Responsivo ─── */}
         {mobileMenuOpen && (
-          <div className="border-b border-white/10 bg-rotta-darkest/95 px-6 py-6 backdrop-blur-2xl lg:hidden animate-fade-in-up">
-            <nav className="flex flex-col space-y-4">
-              {navItems.map((item) => (
+          <div className="border-b border-slate-200 bg-white px-6 py-6 shadow-xl lg:hidden animate-fadeIn">
+            <nav className="flex flex-col space-y-2">
+              {navItems.map((item) => {
+                const Icon = item.icon
+                const isActive = currentPage === item.id
+
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleNavClick(item.id)}
+                    className={`flex items-center justify-between rounded-xl px-4 py-3 text-base font-bold transition-colors text-left ${
+                      isActive
+                        ? 'bg-blue-50 text-rotta-blue'
+                        : 'text-slate-800 hover:bg-slate-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon size={22} className={isActive ? 'text-rotta-blue' : 'text-slate-500'} />
+                      <span>{item.label}</span>
+                    </div>
+                    <ChevronRight size={18} className="text-slate-400" />
+                  </button>
+                )
+              })}
+
+              <div className="pt-4 mt-2 border-t border-slate-100 space-y-3">
                 <a
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-lg px-3 py-2 text-base font-medium text-slate-200 transition-colors hover:bg-white/5 hover:text-rotta-cyan"
+                  href={companyInfo.clientPortalUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 py-3 text-sm font-bold text-slate-700"
                 >
-                  {item.label}
+                  <User size={18} className="text-rotta-blue" />
+                  <span>Acessar Área do Cliente</span>
                 </a>
-              ))}
-              <div className="pt-4 border-t border-white/10">
+
                 <a
                   href={companyInfo.whatsappUrl}
                   target="_blank"
                   rel="noreferrer"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rotta-cyan to-rotta-blue py-3 text-center text-sm font-bold text-rotta-darkest shadow-glow"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white shadow-sm hover:bg-emerald-700"
                 >
-                  <span>Falar no WhatsApp</span>
-                  <ArrowRight size={16} />
+                  <MessageCircle size={18} />
+                  <span>Falar no WhatsApp Oficial</span>
                 </a>
-                <div className="mt-4 text-center text-xs text-slate-400">
-                  <p>Atendimento direto com Douglas Rotta</p>
-                  <p className="mt-1 font-semibold text-rotta-cyan">(46) 98803-7656</p>
-                </div>
               </div>
             </nav>
           </div>
@@ -135,4 +221,3 @@ export function Header() {
     </>
   )
 }
-
