@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { MessageSquare, X } from 'lucide-react'
-import { companyInfo } from '../data/site'
+import { useSiteData } from '../context/SiteContext'
 
 export function WhatsAppFloat() {
+  const { companyInfo } = useSiteData()
   const [showTooltip, setShowTooltip] = useState(true)
 
   return (

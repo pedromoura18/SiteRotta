@@ -10,9 +10,10 @@ import {
   Shield,
   Sparkles,
 } from 'lucide-react'
-import { aboutData, companyInfo, metrics } from '../data/site'
+import { useSiteData } from '../context/SiteContext'
 
 export function AboutPage() {
+  const { aboutData, companyInfo, metrics } = useSiteData()
   return (
     <div className="min-h-screen bg-slate-50 py-12 lg:py-16 animate-fadeIn">
       <div className="container-shell">

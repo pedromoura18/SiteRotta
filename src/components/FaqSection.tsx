@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { ChevronDown, HelpCircle, MessageSquare } from 'lucide-react'
-import { companyInfo, faqs } from '../data/site'
+import { useSiteData } from '../context/SiteContext'
 
 export function FaqSection() {
+  const { companyInfo, faqs } = useSiteData()
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
   const toggleFaq = (index: number) => {

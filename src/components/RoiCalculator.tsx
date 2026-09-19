@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { ArrowRight, Calculator, CheckCircle2, Sparkles, TrendingDown } from 'lucide-react'
-import { companyInfo } from '../data/site'
+import { useSiteData } from '../context/SiteContext'
 
 export function RoiCalculator() {
+  const { companyInfo } = useSiteData()
   const [printersCount, setPrintersCount] = useState<number>(3)
   const [pageVolume, setPageVolume] = useState<number>(3500)
 

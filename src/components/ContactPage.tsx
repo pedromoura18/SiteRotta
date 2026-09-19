@@ -11,9 +11,10 @@ import {
   User,
 } from 'lucide-react'
 import { FacebookIcon, InstagramIcon, LinkedinIcon } from './SocialIcons'
-import { companyInfo } from '../data/site'
+import { useSiteData } from '../context/SiteContext'
 
 export function ContactPage() {
+  const { companyInfo } = useSiteData()
   const [formData, setFormData] = useState({
     name: '',
     email: '',

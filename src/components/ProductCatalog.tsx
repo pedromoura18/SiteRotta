@@ -15,7 +15,7 @@ import {
   Tag,
   X,
 } from 'lucide-react'
-import { companyInfo, productsData } from '../data/site'
+import { useSiteData } from '../context/SiteContext'
 import type { ProductCategory, ProductItem } from '../data/site'
 
 interface ProductCatalogProps {
@@ -35,6 +35,7 @@ const categoriesList: { id: ProductCategory; label: string; icon: React.ElementT
 ]
 
 export function ProductCatalog({ onSelectProduct, initialCategory = 'all' }: ProductCatalogProps) {
+  const { companyInfo, productsData } = useSiteData()
   const [selectedCategory, setSelectedCategory] = useState<ProductCategory>(initialCategory)
   const [searchQuery, setSearchQuery] = useState('')
 

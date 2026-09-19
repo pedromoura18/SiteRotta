@@ -1,0 +1,32 @@
+import { defineType, defineField } from 'sanity'
+
+export const companyInfoType = defineType({
+  name: 'companyInfo',
+  title: 'Dados da Empresa & Contato',
+  type: 'document',
+  fields: [
+    defineField({ name: 'name', title: 'Nome da Empresa', type: 'string', initialValue: 'Rotta Tecnologia' }),
+    defineField({ name: 'tagline', title: 'Slogan / Tagline', type: 'string' }),
+    defineField({ name: 'shortDescription', title: 'Descrição Institucional Curta', type: 'text', rows: 3 }),
+    defineField({ name: 'contactPerson', title: 'Pessoa de Contato', type: 'string' }),
+    defineField({ name: 'phone', title: 'Telefone Principal', type: 'string' }),
+    defineField({ name: 'whatsappRaw', title: 'WhatsApp (Apenas Números com DDD)', type: 'string' }),
+    defineField({ name: 'whatsappUrl', title: 'Link Completo de Início de Conversa WhatsApp', type: 'url' }),
+    defineField({ name: 'email', title: 'E-mail de Atendimento', type: 'string' }),
+    defineField({ name: 'emailGeneral', title: 'E-mail Geral', type: 'string' }),
+    defineField({ name: 'emailDouglas', title: 'E-mail Direto / Douglas', type: 'string' }),
+    defineField({ name: 'clientPortalUrl', title: 'Link da Área / Portal do Cliente', type: 'url' }),
+    defineField({ name: 'website', title: 'Domínio do Site', type: 'string' }),
+    defineField({ name: 'address', title: 'Endereço (Rua e Bairro)', type: 'string' }),
+    defineField({ name: 'city', title: 'Cidade', type: 'string' }),
+    defineField({ name: 'state', title: 'Estado (UF)', type: 'string' }),
+    defineField({ name: 'cep', title: 'CEP', type: 'string' }),
+    defineField({ name: 'fullAddress', title: 'Endereço Completo Formatado', type: 'string' }),
+    defineField({ name: 'businessHours', title: 'Horário de Atendimento', type: 'string' }),
+    defineField({ name: 'instagram', title: 'Link do Instagram', type: 'url' }),
+    defineField({ name: 'facebook', title: 'Link do Facebook', type: 'url' }),
+    defineField({ name: 'linkedin', title: 'Link do LinkedIn', type: 'url' }),
+    defineField({ name: 'mapsEmbedUrl', title: 'URL de Embed do Google Maps', type: 'url' }),
+    defineField({ name: 'mapsUrl', title: 'Link Externo do Google Maps', type: 'url' }),
+  ],
+})

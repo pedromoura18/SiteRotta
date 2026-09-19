@@ -8,13 +8,14 @@ import {
   Store,
   Wrench,
 } from 'lucide-react'
-import { companyInfo, rentalInclusions, services } from '../data/site'
+import { useSiteData } from '../context/SiteContext'
 
 interface ServicesPageProps {
   onNavigateToProducts: () => void
 }
 
 export function ServicesPage({ onNavigateToProducts }: ServicesPageProps) {
+  const { companyInfo, rentalInclusions, services } = useSiteData()
   const getServiceIcon = (iconName: string) => {
     switch (iconName) {
       case 'headset':

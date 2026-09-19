@@ -8,6 +8,7 @@ import { ProductDetailPage } from './components/ProductDetailPage'
 import { ContactPage } from './components/ContactPage'
 import { Footer } from './components/Footer'
 import { WhatsAppFloat } from './components/WhatsAppFloat'
+import { SiteProvider } from './context/SiteContext'
 import type { NavPage } from './components/Header'
 
 export default function App() {
@@ -74,43 +75,45 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col selection:bg-blue-100 selection:text-rotta-navy">
-      {/* Header Fixo com Ícones Maiores e Organizados */}
-      <Header currentPage={currentPage} onNavigate={handleNavigate} />
+    <SiteProvider>
+      <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col selection:bg-blue-100 selection:text-rotta-navy">
+        {/* Header Fixo com Ícones Maiores e Organizados */}
+        <Header currentPage={currentPage} onNavigate={handleNavigate} />
 
-      {/* Conteúdo Dinâmico por Página */}
-      <main className="flex-1">
-        {selectedProductId ? (
-          <ProductDetailPage
-            productId={selectedProductId}
-            onBack={handleBackToCatalog}
-            onSelectProduct={handleSelectProduct}
-          />
-        ) : currentPage === 'home' ? (
-          <HomePage
-            onNavigate={handleNavigate}
-            onSelectProduct={handleSelectProduct}
-          />
-        ) : currentPage === 'sobre' ? (
-          <AboutPage />
-        ) : currentPage === 'servicos' ? (
-          <ServicesPage
-            onNavigateToProducts={() => handleNavigate('produtos')}
-          />
-        ) : currentPage === 'produtos' ? (
-          <ProductCatalog
-            onSelectProduct={handleSelectProduct}
-          />
-        ) : currentPage === 'contato' ? (
-          <ContactPage />
-        ) : null}
-      </main>
+        {/* Conteúdo Dinâmico por Página */}
+        <main className="flex-1">
+          {selectedProductId ? (
+            <ProductDetailPage
+              productId={selectedProductId}
+              onBack={handleBackToCatalog}
+              onSelectProduct={handleSelectProduct}
+            />
+          ) : currentPage === 'home' ? (
+            <HomePage
+              onNavigate={handleNavigate}
+              onSelectProduct={handleSelectProduct}
+            />
+          ) : currentPage === 'sobre' ? (
+            <AboutPage />
+          ) : currentPage === 'servicos' ? (
+            <ServicesPage
+              onNavigateToProducts={() => handleNavigate('produtos')}
+            />
+          ) : currentPage === 'produtos' ? (
+            <ProductCatalog
+              onSelectProduct={handleSelectProduct}
+            />
+          ) : currentPage === 'contato' ? (
+            <ContactPage />
+          ) : null}
+        </main>
 
-      {/* Rodapé Moderno com Links e Redes Sociais */}
-      <Footer onNavigate={handleNavigate} />
+        {/* Rodapé Moderno com Links e Redes Sociais */}
+        <Footer onNavigate={handleNavigate} />
 
-      {/* Botão Flutuante de WhatsApp Oficial */}
-      <WhatsAppFloat />
-    </div>
+        {/* Botão Flutuante de WhatsApp Oficial */}
+        <WhatsAppFloat />
+      </div>
+    </SiteProvider>
   )
 }

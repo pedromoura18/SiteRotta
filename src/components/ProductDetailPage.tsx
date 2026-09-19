@@ -13,7 +13,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from 'lucide-react'
-import { companyInfo, productsData } from '../data/site'
+import { useSiteData } from '../context/SiteContext'
 
 interface ProductDetailPageProps {
   productId: string
@@ -26,6 +26,7 @@ export function ProductDetailPage({
   onBack,
   onSelectProduct,
 }: ProductDetailPageProps) {
+  const { companyInfo, productsData } = useSiteData()
   const product = productsData.find((p) => p.id === productId) || productsData[0]
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [copied, setCopied] = useState(false)

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import { BrandMark } from './BrandMark'
 import { FacebookIcon, InstagramIcon, LinkedinIcon } from './SocialIcons'
-import { companyInfo } from '../data/site'
+import { useSiteData } from '../context/SiteContext'
 import type { NavPage } from './Header'
 
 interface FooterProps {
@@ -19,6 +19,7 @@ interface FooterProps {
 }
 
 export function Footer({ onNavigate }: FooterProps) {
+  const { companyInfo } = useSiteData()
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }

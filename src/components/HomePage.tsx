@@ -21,7 +21,7 @@ import {
 } from 'lucide-react'
 import { PartnerLogos } from './PartnerLogos'
 import { RoiCalculator } from './RoiCalculator'
-import { companyInfo, metrics, productsData } from '../data/site'
+import { useSiteData } from '../context/SiteContext'
 import type { NavPage } from './Header'
 import type { ProductCategory } from '../data/site'
 
@@ -31,6 +31,7 @@ interface HomePageProps {
 }
 
 export function HomePage({ onNavigate, onSelectProduct }: HomePageProps) {
+  const { companyInfo, metrics, productsData } = useSiteData()
   // Aba de produtos em destaque na Home
   const [homeProductCategory, setHomeProductCategory] = useState<ProductCategory>('impressoras')
 

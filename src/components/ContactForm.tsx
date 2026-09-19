@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { ArrowRight, CheckCircle2, Clock, Mail, MapPin, MessageSquare, Send, Sparkles } from 'lucide-react'
-import { companyInfo } from '../data/site'
+import { useSiteData } from '../context/SiteContext'
 
 export function ContactForm() {
+  const { companyInfo } = useSiteData()
   const [formData, setFormData] = useState({
     name: '',
     company: '',

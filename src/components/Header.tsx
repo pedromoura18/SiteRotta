@@ -15,7 +15,7 @@ import {
   X,
 } from 'lucide-react'
 import { BrandMark } from './BrandMark'
-import { companyInfo } from '../data/site'
+import { useSiteData } from '../context/SiteContext'
 
 export type NavPage = 'home' | 'sobre' | 'servicos' | 'produtos' | 'contato'
 
@@ -33,6 +33,7 @@ const navItems: { id: NavPage; label: string; icon: React.ElementType }[] = [
 ]
 
 export function Header({ currentPage, onNavigate }: HeaderProps) {
+  const { companyInfo } = useSiteData()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const handleNavClick = (page: NavPage) => {
@@ -48,24 +49,24 @@ export function Header({ currentPage, onNavigate }: HeaderProps) {
         <div className="container-shell flex items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             <a
-              href="tel:5546988037656"
+              href={`tel:${companyInfo.whatsappRaw || '5546988037656'}`}
               className="inline-flex items-center gap-2 font-semibold text-slate-700 transition-colors hover:text-rotta-blue"
             >
               <PhoneCall size={14} className="text-rotta-blue" />
-              <span>(46) 9 8803-7656</span>
+              <span>{companyInfo.phone}</span>
             </a>
 
             <a
-              href="mailto:atendimento@rottatecnologia.com.br"
+              href={`mailto:${companyInfo.email}`}
               className="inline-flex items-center gap-2 text-slate-600 transition-colors hover:text-rotta-blue"
             >
               <Mail size={14} className="text-rotta-blue" />
-              <span>atendimento@rottatecnologia.com.br</span>
+              <span>{companyInfo.email}</span>
             </a>
 
             <div className="inline-flex items-center gap-1.5 text-slate-500">
               <MapPin size={14} className="text-rotta-blue" />
-              <span>Francisco Beltrão - PR</span>
+              <span>{companyInfo.city} - {companyInfo.state}</span>
             </div>
           </div>
 
