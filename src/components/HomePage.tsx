@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   ArrowRight,
   Award,
   CalendarCheck,
+  ChevronLeft,
   ChevronRight,
   Cpu,
   Headset,
@@ -14,10 +15,7 @@ import {
   RefreshCw,
   Scissors,
   ShieldCheck,
-  Store,
   Tag,
-  Wrench,
-  Zap,
 } from 'lucide-react'
 import { PartnerLogos } from './PartnerLogos'
 import { RoiCalculator } from './RoiCalculator'
@@ -47,162 +45,226 @@ export function HomePage({ onNavigate, onSelectProduct }: HomePageProps) {
     })
     .slice(0, 4)
 
+  // ── Hero Slideshow data ──────────────────────────────────────────────────
+  const heroSlides = [
+    {
+      id: 0,
+      img: '/hero_impressoras.jpg',
+      badge: 'Impressoras Corporativas',
+      title: 'Impressão de alto volume com total controle de custos',
+      subtitle:
+        'Brother, HP e Epson multifuncionais para ambientes corporativos exigentes. Toners, peças e máquina reserva inclusos no contrato.',
+      cta: { label: 'Solicitar Orçamento', href: companyInfo.whatsappUrl, external: true },
+      cta2: { label: 'Ver Catálogo', page: 'produtos' as NavPage },
+    },
+    {
+      id: 1,
+      img: '/hero_outsourcing.jpg',
+      badge: 'Outsourcing de Impressão',
+      title: 'Terceirize sua impressão e reduza até 40% dos custos',
+      subtitle:
+        'Contrato completo: equipamento, suporte on-site, manutenção preventiva e reposição imediata. Sua empresa foca no que importa.',
+      cta: { label: 'Conhecer o Serviço', href: companyInfo.whatsappUrl, external: true },
+      cta2: { label: 'Sobre a Rotta', page: 'sobre' as NavPage },
+    },
+    {
+      id: 2,
+      img: '/hero_automacao.jpg',
+      badge: 'Automação Comercial',
+      title: 'PDV, SAT Fiscal e NFC-e para o seu negócio',
+      subtitle:
+        'Terminais de ponto de venda, leitores de código de barras e impressoras fiscais integradas. Soluções homologadas e com suporte local.',
+      cta: { label: 'Falar com Especialista', href: companyInfo.whatsappUrl, external: true },
+      cta2: { label: 'Ver Produtos', page: 'produtos' as NavPage },
+    },
+    {
+      id: 3,
+      img: '/hero_assistencia.jpg',
+      badge: 'Assistência Técnica Especializada',
+      title: 'Laboratório próprio com técnicos certificados',
+      subtitle:
+        'Manutenção corretiva e preventiva presencial ou remota. Peças originais, agilidade no atendimento e garantia de serviço.',
+      cta: { label: 'Agendar Visita Técnica', href: companyInfo.whatsappUrl, external: true },
+      cta2: { label: 'Nossos Serviços', page: 'servicos' as NavPage },
+    },
+    {
+      id: 4,
+      img: '/hero_etiquetas.jpg',
+      badge: 'Etiquetas & Scanners Industriais',
+      title: 'Impressoras de etiquetas Zebra, Brother e Elgin',
+      subtitle:
+        'Soluções completas de rastreamento e identificação: impressoras térmicas, scanners corporativos e rotuladores eletrônicos P-touch.',
+      cta: { label: 'Solicitar Orçamento', href: companyInfo.whatsappUrl, external: true },
+      cta2: { label: 'Ver Etiquetadoras', page: 'produtos' as NavPage },
+    },
+  ]
+
+  const [activeSlide, setActiveSlide] = useState(0)
+  const [animKey, setAnimKey] = useState(0)
+
+  const goToSlide = useCallback((idx: number) => {
+    setActiveSlide(idx)
+    setAnimKey((k) => k + 1)
+  }, [])
+
+  const prevSlide = useCallback(() => {
+    goToSlide((activeSlide - 1 + heroSlides.length) % heroSlides.length)
+  }, [activeSlide, goToSlide, heroSlides.length])
+
+  const nextSlide = useCallback(() => {
+    goToSlide((activeSlide + 1) % heroSlides.length)
+  }, [activeSlide, goToSlide, heroSlides.length])
+
+  // Auto-advance every 6s
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlide((s) => (s + 1) % heroSlides.length)
+      setAnimKey((k) => k + 1)
+    }, 15000)
+    return () => clearInterval(timer)
+  }, [heroSlides.length])
+
+  const slide = heroSlides[activeSlide]
+
   return (
     <div className="animate-fadeIn">
       {/* =========================================
-          1. HERO SECTION CLARA, MODERNA & ELEGANTE
+          1. HERO FULLSCREEN SLIDESHOW
          ========================================= */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-blue-50/60 via-slate-50 to-white py-14 sm:py-20 lg:py-24 border-b border-slate-200/80">
-        {/* Elementos sutis de fundo */}
-        <div className="absolute top-0 right-1/4 h-96 w-96 rounded-full bg-blue-100/50 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-10 h-80 w-80 rounded-full bg-cyan-100/40 blur-3xl pointer-events-none" />
+      <section className="relative w-full overflow-hidden" style={{ height: 'min(90vh, 720px)', minHeight: '520px' }}>
+        {/* Background images stack – only active one is visible */}
+        {heroSlides.map((s, i) => (
+          <div
+            key={s.id}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              i === activeSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
+            }`}
+          >
+            <img
+              src={s.img}
+              alt={s.badge}
+              className={`hero-bg-img w-full h-full object-cover object-center ${
+                i === activeSlide ? 'hero-slide-active' : ''
+              }`}
+              key={i === activeSlide ? `img-${animKey}` : `img-${i}`}
+            />
+          </div>
+        ))}
 
-        <div className="container-shell relative z-10">
-          <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
-            {/* Coluna Texto Principal */}
-            <div className="lg:col-span-7 space-y-6">
-              {/* Badge Slogan Oficial */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-rotta-blue">
-                <span className="flex h-2 w-2 rounded-full bg-rotta-blue animate-pulse" />
-                <span>Solução • Inovação • Compromisso</span>
+        {/* Dark gradient overlay */}
+        <div className="absolute inset-0 z-20 bg-gradient-to-r from-rotta-darkest/90 via-rotta-navy/70 to-transparent" />
+        <div className="absolute inset-0 z-20 bg-gradient-to-t from-rotta-darkest/60 via-transparent to-transparent" />
+
+        {/* Content */}
+        <div className="relative z-30 flex h-full items-center">
+          <div className="container-shell">
+            <div className="max-w-2xl xl:max-w-3xl space-y-5 py-12">
+              {/* Badge */}
+              <div
+                key={`badge-${animKey}`}
+                className="hero-text-animate inline-flex items-center gap-2 rounded-full border border-rotta-cyan/40 bg-rotta-cyan/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-rotta-cyan backdrop-blur-sm"
+              >
+                <span className="flex h-2 w-2 rounded-full bg-rotta-cyan animate-pulse" />
+                {slide.badge}
               </div>
 
-              {/* Título Principal de Alto Impacto */}
-              <h1 className="text-4xl font-black tracking-tight text-slate-900 sm:text-5xl lg:text-6xl leading-[1.1]">
-                Tecnologia Inteligente e <span className="text-gradient-brand">Infraestrutura Completa</span> para sua Empresa.
+              {/* Title */}
+              <h1
+                key={`title-${animKey}`}
+                className="hero-text-animate-2 text-3xl font-black leading-[1.1] tracking-tight text-white sm:text-4xl lg:text-5xl xl:text-6xl"
+              >
+                {slide.title}
               </h1>
 
-              {/* Subtítulo */}
-              <p className="text-base sm:text-lg leading-relaxed text-slate-600 max-w-2xl">
-                Fundada em 2016 em Francisco Beltrão - PR, entregamos soluções corporativas em <strong>Outsourcing de Impressão</strong>, <strong>Automação Comercial</strong> e <strong>Assistência Técnica</strong> com reposição imediata de peças, toners e máquina reserva inclusos.
+              {/* Subtitle */}
+              <p
+                key={`sub-${animKey}`}
+                className="hero-text-animate-3 text-sm sm:text-base lg:text-lg leading-relaxed text-slate-300 max-w-xl"
+              >
+                {slide.subtitle}
               </p>
 
-              {/* Botões de Ação */}
-              <div className="flex flex-wrap items-center gap-3.5 pt-2">
+              {/* CTAs */}
+              <div key={`cta-${animKey}`} className="hero-text-animate-3 flex flex-wrap items-center gap-3.5 pt-2">
                 <a
-                  href={companyInfo.whatsappUrl}
+                  href={slide.cta.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-rotta-blue to-rotta-blue-dark px-6 py-3.5 text-sm sm:text-base font-bold text-white shadow-md transition-all hover:shadow-lg hover:brightness-105 hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-rotta-cyan to-rotta-blue px-6 py-3.5 text-sm sm:text-base font-bold text-white shadow-lg transition-all hover:brightness-110 hover:-translate-y-0.5 hover:shadow-rotta-blue/40"
                 >
                   <MessageCircle size={18} />
-                  <span>Solicitar Orçamento Grátis</span>
-                  <ArrowRight size={17} />
+                  <span>{slide.cta.label}</span>
+                  <ArrowRight size={16} />
                 </a>
-
                 <button
                   type="button"
-                  onClick={() => onNavigate('produtos')}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm sm:text-base font-bold text-slate-700 shadow-2xs transition-all hover:bg-slate-50 hover:border-rotta-blue hover:text-rotta-blue hover:-translate-y-0.5"
+                  onClick={() => onNavigate(slide.cta2.page)}
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-6 py-3.5 text-sm sm:text-base font-bold text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:-translate-y-0.5"
                 >
                   <Layers size={17} />
-                  <span>Ver Catálogo de Produtos</span>
+                  {slide.cta2.label}
                 </button>
               </div>
 
-              {/* Selos de Confiança */}
-              <div className="pt-4 flex flex-wrap items-center gap-6 text-xs font-semibold text-slate-600">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck size={18} className="text-rotta-blue" />
-                  <span>Equipamentos Homologados</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Headset size={18} className="text-rotta-blue" />
-                  <span>Suporte On-Site e Ágil</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Award size={18} className="text-rotta-blue" />
-                  <span>Máquina Reserva (Swap)</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Coluna Visual: Card de Demonstração & Destaques */}
-            <div className="lg:col-span-5">
-              <div className="relative mx-auto max-w-md lg:max-w-none">
-                <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-lg space-y-6">
-                  {/* Topo do Card */}
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-rotta-blue">
-                        <Zap size={22} />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-400">Rotta Tecnologia</p>
-                        <p className="text-sm font-extrabold text-slate-900">Soluções Corporativas B2B</p>
-                      </div>
-                    </div>
-                    <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700 border border-emerald-200">
-                      Atendimento Ativo
-                    </span>
+              {/* Trust badges */}
+              <div key={`trust-${animKey}`} className="hero-text-animate-3 hidden sm:flex flex-wrap items-center gap-5 pt-1">
+                {[
+                  { icon: ShieldCheck, label: 'Equipamentos Homologados' },
+                  { icon: Award,       label: 'Máquina Reserva (Swap)' },
+                  { icon: Headset,     label: 'Suporte On-Site Ágil' },
+                ].map(({ icon: Icon, label }) => (
+                  <div key={label} className="flex items-center gap-2 text-xs font-semibold text-slate-300">
+                    <Icon size={15} className="text-rotta-cyan" />
+                    <span>{label}</span>
                   </div>
-
-                  {/* Lista de Recursos Rápidos */}
-                  <div className="space-y-3">
-                    <div
-                      onClick={() => onNavigate('servicos')}
-                      className="cursor-pointer flex items-center justify-between rounded-xl bg-slate-50 p-3.5 border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Printer size={18} className="text-rotta-blue shrink-0" />
-                        <span className="text-xs font-bold text-slate-800">Outsourcing de Impressão</span>
-                      </div>
-                      <span className="text-xs font-bold text-emerald-600">Até -40% custos</span>
-                    </div>
-
-                    <div
-                      onClick={() => onNavigate('servicos')}
-                      className="cursor-pointer flex items-center justify-between rounded-xl bg-slate-50 p-3.5 border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Store size={18} className="text-rotta-blue shrink-0" />
-                        <span className="text-xs font-bold text-slate-800">Automação Comercial & PDV</span>
-                      </div>
-                      <span className="text-xs font-bold text-slate-500">SAT / NFC-e</span>
-                    </div>
-
-                    <div
-                      onClick={() => onNavigate('servicos')}
-                      className="cursor-pointer flex items-center justify-between rounded-xl bg-slate-50 p-3.5 border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Wrench size={18} className="text-rotta-blue shrink-0" />
-                        <span className="text-xs font-bold text-slate-800">Assistência Especializada</span>
-                      </div>
-                      <span className="text-xs font-bold text-slate-500">Laboratório próprio</span>
-                    </div>
-
-                    <div
-                      onClick={() => onNavigate('servicos')}
-                      className="cursor-pointer flex items-center justify-between rounded-xl bg-slate-50 p-3.5 border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Headset size={18} className="text-rotta-blue shrink-0" />
-                        <span className="text-xs font-bold text-slate-800">Suporte Técnico de TI</span>
-                      </div>
-                      <span className="text-xs font-bold text-slate-500">Presencial e Remoto</span>
-                    </div>
-                  </div>
-
-                  {/* Rodapé do Card */}
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                    <span className="flex items-center gap-1.5">
-                      <MapPin size={14} className="text-rotta-blue" />
-                      <span>Francisco Beltrão e Região</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => onNavigate('servicos')}
-                      className="font-bold text-rotta-blue hover:underline flex items-center gap-1"
-                    >
-                      <span>Ver detalhes</span>
-                      <ChevronRight size={14} />
-                    </button>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
+        </div>
+
+        {/* ── Navigation arrows ── */}
+        <button
+          type="button"
+          onClick={prevSlide}
+          aria-label="Slide anterior"
+          className="absolute left-4 top-1/2 z-40 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/30 text-white backdrop-blur-sm transition-all hover:bg-black/50 hover:scale-110 sm:left-6"
+        >
+          <ChevronLeft size={22} />
+        </button>
+        <button
+          type="button"
+          onClick={nextSlide}
+          aria-label="Próximo slide"
+          className="absolute right-4 top-1/2 z-40 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/30 text-white backdrop-blur-sm transition-all hover:bg-black/50 hover:scale-110 sm:right-6"
+        >
+          <ChevronRight size={22} />
+        </button>
+
+        {/* ── Dot indicators ── */}
+        <div className="absolute bottom-6 left-1/2 z-40 flex -translate-x-1/2 gap-2">
+          {heroSlides.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => goToSlide(i)}
+              aria-label={`Ir para slide ${i + 1}`}
+              className={`transition-all duration-300 rounded-full ${
+                i === activeSlide
+                  ? 'w-8 h-2.5 bg-rotta-cyan'
+                  : 'w-2.5 h-2.5 bg-white/40 hover:bg-white/70'
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Progress bar */}
+        <div className="absolute bottom-0 left-0 z-40 h-0.5 w-full bg-white/10">
+          <div
+            key={`progress-${animKey}`}
+            className="h-full bg-rotta-cyan"
+            style={{ animation: 'heroProgress 15s linear forwards' }}
+          />
         </div>
       </section>
 
