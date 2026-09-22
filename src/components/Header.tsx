@@ -228,7 +228,7 @@ export function Header({ currentPage, onNavigate }: HeaderProps) {
                     <button
                       ref={produtosButtonRef}
                       type="button"
-                      onClick={() => setProdutosOpen((v) => !v)}
+                      onClick={() => handleNavClick('produtos')}
                       onMouseEnter={() => setProdutosOpen(true)}
                       className={`inline-flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm sm:text-[15px] font-bold transition-all duration-200 ${
                         isActive || produtosOpen
@@ -412,38 +412,47 @@ export function Header({ currentPage, onNavigate }: HeaderProps) {
                 if (isProdutos) {
                   return (
                     <div key={item.id}>
-                      <button
-                        type="button"
-                        onClick={() => setMobileProdutosOpen((v) => !v)}
-                        className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-base font-bold transition-colors text-left ${
+                      <div
+                        className={`flex w-full items-center justify-between rounded-xl transition-colors ${
                           isActive || mobileProdutosOpen
-                            ? 'bg-blue-50 text-rotta-blue'
-                            : 'text-slate-800 hover:bg-slate-100'
+                            ? 'bg-blue-50'
+                            : 'hover:bg-slate-100'
                         }`}
                       >
-                        <div className="flex items-center gap-3">
+                        {/* Clicar no label navega direto para produtos */}
+                        <button
+                          type="button"
+                          onClick={() => handleNavClick('produtos')}
+                          className={`flex flex-1 items-center gap-3 px-4 py-3 text-base font-bold transition-colors text-left ${
+                            isActive || mobileProdutosOpen
+                              ? 'text-rotta-blue'
+                              : 'text-slate-800'
+                          }`}
+                        >
                           <Layers size={22} className={isActive ? 'text-rotta-blue' : 'text-slate-500'} />
                           <span>Produtos</span>
-                        </div>
-                        <ChevronDown
-                          size={18}
-                          className={`transition-transform duration-200 ${
-                            mobileProdutosOpen ? 'rotate-180 text-rotta-blue' : 'text-slate-400'
+                        </button>
+                        {/* Chevron abre/fecha o submenu de categorias */}
+                        <button
+                          type="button"
+                          onClick={() => setMobileProdutosOpen((v) => !v)}
+                          className={`flex items-center justify-center rounded-xl p-3 transition-colors ${
+                            mobileProdutosOpen ? 'text-rotta-blue' : 'text-slate-400'
                           }`}
-                        />
-                      </button>
+                          aria-label="Expandir categorias de produtos"
+                        >
+                          <ChevronDown
+                            size={18}
+                            className={`transition-transform duration-200 ${
+                              mobileProdutosOpen ? 'rotate-180' : ''
+                            }`}
+                          />
+                        </button>
+                      </div>
 
                       {/* Submenu mobile categorias */}
                       {mobileProdutosOpen && (
                         <div className="mt-2 ml-4 space-y-1 border-l-2 border-blue-100 pl-4">
-                          <button
-                            type="button"
-                            onClick={() => handleNavClick('produtos')}
-                            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-bold text-rotta-blue hover:bg-blue-50"
-                          >
-                            <Layers size={15} />
-                            Ver todos os produtos
-                          </button>
                           {productCategories.map((cat) => {
                             const CatIcon = cat.icon
                             return (
