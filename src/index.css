@@ -89,8 +89,41 @@ body {
   }
 }
 
+@keyframes dropdownPop {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideDownSubmenu {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    max-height: 600px;
+    transform: translateY(0);
+  }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-dropdownPop {
+  animation: dropdownPop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top center;
+}
+
+.animate-slideDownSubmenu {
+  animation: slideDownSubmenu 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @layer components {

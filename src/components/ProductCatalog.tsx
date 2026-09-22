@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   ArrowRight,
   Check,
@@ -38,6 +38,19 @@ export function ProductCatalog({ onSelectProduct, initialCategory = 'all' }: Pro
   const { companyInfo, productsData } = useSiteData()
   const [selectedCategory, setSelectedCategory] = useState<ProductCategory>(initialCategory)
   const [searchQuery, setSearchQuery] = useState('')
+
+  // Listen for category change events dispatched by the Header mega-menu
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ category: ProductCategory }>).detail
+      if (detail?.category) {
+        setSelectedCategory(detail.category)
+        setSearchQuery('')
+      }
+    }
+    window.addEventListener('setProductCategory', handler)
+    return () => window.removeEventListener('setProductCategory', handler)
+  }, [])
 
   const filteredProducts = useMemo(() => {
     return productsData.filter((item) => {
