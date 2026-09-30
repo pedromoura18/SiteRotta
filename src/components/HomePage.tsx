@@ -20,6 +20,7 @@ import {
 import { PartnerLogos } from './PartnerLogos'
 import { RoiCalculator } from './RoiCalculator'
 import { useSiteData } from '../context/SiteContext'
+import { useScrollReveal, useParallax } from '../utils/useParallax'
 import type { NavPage } from './Header'
 import type { ProductCategory } from '../data/site'
 
@@ -30,6 +31,8 @@ interface HomePageProps {
 
 export function HomePage({ onNavigate, onSelectProduct }: HomePageProps) {
   const { companyInfo, metrics, productsData } = useSiteData()
+  useScrollReveal()
+  const parallaxOffsetY = useParallax(0.15)
   // Aba de produtos em destaque na Home
   const [homeProductCategory, setHomeProductCategory] = useState<ProductCategory>('impressoras')
 
@@ -294,8 +297,12 @@ export function HomePage({ onNavigate, onSelectProduct }: HomePageProps) {
       {/* =========================================
           3. VITRINE DE PRODUTOS NA HOME (CATEGORIZADA)
          ========================================= */}
-      <section className="py-16 sm:py-20 bg-slate-50 border-b border-slate-200">
-        <div className="container-shell">
+      <section className="relative py-16 sm:py-20 bg-slate-50 border-b border-slate-200 overflow-hidden">
+        <div
+          className="pointer-events-none absolute -top-10 right-0 h-96 w-96 rounded-full bg-blue-300/20 blur-3xl"
+          style={{ transform: `translateY(${parallaxOffsetY * 0.5}px)` }}
+        />
+        <div className="container-shell relative z-10">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
             <div>
               <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-100 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-rotta-blue">
@@ -390,18 +397,18 @@ export function HomePage({ onNavigate, onSelectProduct }: HomePageProps) {
 
           {/* Cards dos Produtos da Home */}
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {featuredProducts.map((prod) => (
+            {featuredProducts.map((prod, idx) => (
               <div
                 key={prod.id}
                 onClick={() => onSelectProduct(prod.id)}
-                className="group cursor-pointer flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs transition-all hover:-translate-y-1 hover:border-rotta-blue hover:shadow-md"
+                className={`group cursor-pointer flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs transition-all hover-parallax-card reveal-on-scroll reveal-delay-${(idx % 4) + 1}`}
               >
-                <div className="relative aspect-4/3 overflow-hidden rounded-xl bg-slate-50 flex items-center justify-center p-3">
+                <div className="relative h-48 w-full overflow-hidden rounded-xl bg-white border border-slate-100 flex items-center justify-center p-3">
                   <img
-                    src={prod.images[0]}
+                    src={prod.images && prod.images.length > 0 ? prod.images[0] : '/placeholder.png'}
                     alt={prod.name}
                     loading="lazy"
-                    className="h-full w-full object-cover sm:object-contain transition-transform duration-300 group-hover:scale-105"
+                    className="max-h-full max-w-full h-auto w-auto object-contain transition-transform duration-300 group-hover:scale-105 select-none"
                   />
                   <span className="absolute top-2 left-2 rounded-md bg-rotta-blue px-2 py-0.5 text-[10px] font-black uppercase text-white shadow-2xs">
                     {prod.brand}

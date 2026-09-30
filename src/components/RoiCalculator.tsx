@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { ArrowRight, Calculator, CheckCircle2, Sparkles, TrendingDown } from 'lucide-react'
 import { useSiteData } from '../context/SiteContext'
+import { useScrollReveal } from '../utils/useParallax'
 
 export function RoiCalculator() {
   const { companyInfo } = useSiteData()
+  useScrollReveal()
   const [printersCount, setPrintersCount] = useState<number>(3)
   const [pageVolume, setPageVolume] = useState<number>(3500)
 
@@ -42,7 +44,7 @@ export function RoiCalculator() {
         </p>
       </div>
 
-      <div className="mx-auto max-w-5xl rounded-3xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm">
+      <div className="mx-auto max-w-5xl rounded-3xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm reveal-on-scroll">
         <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
           {/* Controles / Sliders */}
           <div className="space-y-8 lg:col-span-7">

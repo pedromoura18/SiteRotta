@@ -16,6 +16,7 @@ import {
   X,
 } from 'lucide-react'
 import { useSiteData } from '../context/SiteContext'
+import { useScrollReveal, useParallax } from '../utils/useParallax'
 import type { ProductCategory, ProductItem } from '../data/site'
 
 interface ProductCatalogProps {
@@ -36,6 +37,8 @@ const categoriesList: { id: ProductCategory; label: string; icon: React.ElementT
 
 export function ProductCatalog({ onSelectProduct, initialCategory = 'all' }: ProductCatalogProps) {
   const { companyInfo, productsData } = useSiteData()
+  useScrollReveal()
+  const parallaxOffsetY = useParallax(0.12)
   const [selectedCategory, setSelectedCategory] = useState<ProductCategory>(initialCategory)
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -75,8 +78,12 @@ export function ProductCatalog({ onSelectProduct, initialCategory = 'all' }: Pro
   }
 
   return (
-    <section className="min-h-screen bg-slate-50 py-12 lg:py-16 text-slate-900 animate-fadeIn">
-      <div className="container-shell">
+    <section className="relative min-h-screen bg-slate-50 py-12 lg:py-16 text-slate-900 animate-fadeIn overflow-hidden">
+      <div
+        className="pointer-events-none absolute -top-20 right-0 h-96 w-96 rounded-full bg-blue-300/20 blur-3xl"
+        style={{ transform: `translateY(${parallaxOffsetY * 0.5}px)` }}
+      />
+      <div className="container-shell relative z-10">
         {/* ── Cabeçalho do Catálogo ── */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 pb-8 border-b border-slate-200">
           <div className="max-w-2xl">
@@ -191,21 +198,21 @@ export function ProductCatalog({ onSelectProduct, initialCategory = 'all' }: Pro
           </div>
         ) : (
           <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredProducts.map((product) => (
+            {filteredProducts.map((product, idx) => (
               <div
                 key={product.id}
-                className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xs transition-all duration-300 hover:-translate-y-1 hover:border-rotta-blue/60 hover:shadow-md"
+                className={`group flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xs transition-all duration-300 hover-parallax-card reveal-on-scroll reveal-delay-${(idx % 4) + 1}`}
               >
                 {/* Imagem do Produto Clicável */}
                 <div
                   onClick={() => onSelectProduct(product.id)}
-                  className="relative aspect-4/3 w-full cursor-pointer overflow-hidden bg-slate-50 flex items-center justify-center p-3"
+                  className="relative h-60 w-full cursor-pointer overflow-hidden bg-white flex items-center justify-center p-4 border-b border-slate-100 group-hover:bg-slate-50/60 transition-colors"
                 >
                   <img
-                    src={product.images[0]}
+                    src={product.images && product.images.length > 0 ? product.images[0] : '/placeholder.png'}
                     alt={product.name}
                     loading="lazy"
-                    className="h-full w-full object-cover sm:object-contain transition-transform duration-500 group-hover:scale-105"
+                    className="max-h-full max-w-full h-auto w-auto object-contain transition-transform duration-500 group-hover:scale-105 select-none"
                   />
 
                   {/* Badges */}

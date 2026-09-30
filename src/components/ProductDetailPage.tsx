@@ -107,12 +107,13 @@ export function ProductDetailPage({
         <div className="mt-8 grid gap-10 lg:grid-cols-12 lg:gap-12 items-start">
           {/* ── Coluna Esquerda: Galeria de Fotos Passando (Slider / Carrossel) ── */}
           <div className="lg:col-span-6 space-y-4 lg:sticky lg:top-28">
-            <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm aspect-4/3 flex items-center justify-center group">
+            <div className="relative h-72 sm:h-96 w-full overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm flex items-center justify-center p-4 sm:p-6 group">
               {/* Imagem Principal em Alta Definição */}
               <img
+                key={currentImageIndex}
                 src={images[currentImageIndex]}
                 alt={`${product.name} - Foto ${currentImageIndex + 1}`}
-                className="h-full w-full object-cover sm:object-contain p-2 sm:p-4 transition-all duration-300"
+                className="max-h-full max-w-full h-auto w-auto object-contain transition-all duration-300 animate-fadeIn select-none"
               />
 
               {/* Badges Flutuantes */}
@@ -157,13 +158,13 @@ export function ProductDetailPage({
 
             {/* Miniaturas Clicáveis para Troca Imediata */}
             {images.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto pb-2">
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
                 {images.map((img, idx) => (
                   <button
-                    key={img}
+                    key={idx}
                     type="button"
                     onClick={() => setCurrentImageIndex(idx)}
-                    className={`relative h-20 w-24 shrink-0 overflow-hidden rounded-xl border-2 bg-white transition-all ${
+                    className={`relative h-20 w-24 shrink-0 overflow-hidden rounded-xl border-2 bg-white flex items-center justify-center p-1.5 transition-all ${
                       currentImageIndex === idx
                         ? 'border-rotta-blue ring-2 ring-blue-100 scale-102'
                         : 'border-slate-200 opacity-70 hover:opacity-100 hover:border-slate-300'
@@ -172,7 +173,7 @@ export function ProductDetailPage({
                     <img
                       src={img}
                       alt={`Miniatura ${idx + 1}`}
-                      className="h-full w-full object-cover"
+                      className="max-h-full max-w-full h-auto w-auto object-contain select-none"
                     />
                   </button>
                 ))}
@@ -338,11 +339,11 @@ export function ProductDetailPage({
                   onClick={() => onSelectProduct(rel.id)}
                   className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs transition-all hover:-translate-y-1 hover:border-rotta-blue hover:shadow-md"
                 >
-                  <div className="relative aspect-4/3 overflow-hidden rounded-xl bg-slate-100">
+                  <div className="relative h-48 w-full overflow-hidden rounded-xl bg-white border border-slate-100 flex items-center justify-center p-3">
                     <img
-                      src={rel.images[0]}
+                      src={rel.images && rel.images.length > 0 ? rel.images[0] : '/placeholder.png'}
                       alt={rel.name}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="max-h-full max-w-full h-auto w-auto object-contain transition-transform duration-300 group-hover:scale-105 select-none"
                     />
                     <span className="absolute bottom-2 left-2 rounded-md bg-black/60 backdrop-blur-sm px-2 py-0.5 text-[11px] font-bold text-white">
                       {rel.brand}

@@ -7,7 +7,11 @@ export const PRODUCTS_QUERY = `*[_type == "product"] | order(order asc, _created
   categoryLabel,
   brand,
   modelType,
-  "images": coalesce(images[].asset->url, []),
+  "images": select(
+    defined(images[0].asset) => images[].asset->url,
+    defined(images) => images,
+    []
+  ),
   description,
   longDescription,
   features,
