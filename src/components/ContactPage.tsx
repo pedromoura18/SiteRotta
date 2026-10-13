@@ -2,7 +2,6 @@ import { useState } from 'react'
 import {
   CheckCircle2,
   Clock,
-  ExternalLink,
   Mail,
   MapPin,
   MessageCircle,
@@ -12,8 +11,13 @@ import {
 } from 'lucide-react'
 import { FacebookIcon, InstagramIcon, LinkedinIcon } from './SocialIcons'
 import { useSiteData } from '../context/SiteContext'
+import type { NavPage } from './Header'
 
-export function ContactPage() {
+interface ContactPageProps {
+  onNavigate?: (page: NavPage) => void
+}
+
+export function ContactPage({ onNavigate }: ContactPageProps) {
   const { companyInfo } = useSiteData()
   const [formData, setFormData] = useState({
     name: '',
@@ -197,16 +201,18 @@ export function ContactPage() {
 
                 <div className="h-6 w-px bg-slate-200 ml-auto" />
 
-                <a
-                  href={companyInfo.clientPortalUrl}
-                  target="_blank"
-                  rel="noreferrer"
+                <button
+                  type="button"
+                  onClick={() =>
+                    onNavigate
+                      ? onNavigate('area-cliente')
+                      : (window.location.hash = '#/area-cliente')
+                  }
                   className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-rotta-blue transition-colors"
                 >
                   <User size={14} className="text-rotta-blue" />
                   <span>Área do Cliente</span>
-                  <ExternalLink size={12} className="text-slate-400" />
-                </a>
+                </button>
               </div>
             </div>
           </div>

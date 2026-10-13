@@ -322,9 +322,8 @@ export const productsData: ProductItem[] = [
     brand: 'Brother',
     modelType: 'Locação & Venda',
     images: [
-      'https://assets.brother.com/transform/4181a1ae-8b13-46a1-90b2-72a616c7da98/17522_ADS4700W-Spinner-1-846x846-jpg',
-      'https://www.brother.com.br/-/media/brother/product-catalog-media/images/2022/08/26/11/49/scanner_de_mesa_ads4700w_00.png',
       'https://support.brother.com/g/b/img/product/ads4700w_us.jpg',
+      'https://assets.brother.com/transform/4181a1ae-8b13-46a1-90b2-72a616c7da98/17522_ADS4700W-Spinner-1-846x846-jpg',
     ],
     description:
       'Digitalização veloz de até 40 ppm / 80 ipm, alimentador para 80 folhas, tela touchscreen de 4,3" e Wi-Fi para integração direta a nuvens e pastas de rede.',
@@ -358,9 +357,8 @@ export const productsData: ProductItem[] = [
     brand: 'Brother',
     modelType: 'Locação & Venda',
     images: [
-      'https://assets.brother.com/transform/ce903ee4-be23-455b-b9f4-7e77bd94bfa2/17523_ADS4900W-Spinner-1-846x846-jpg',
-      'https://www.brother.com.br/-/media/brother/product-catalog-media/images/2022/08/26/11/50/scanner_de_mesa_ads4900w_00.png',
       'https://support.brother.com/g/b/img/product/ads4900w_us.jpg',
+      'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=1000&q=80',
     ],
     description:
       'Solução para grandes volumes com velocidade impressionante de até 60 ppm / 120 ipm, alimentador para 100 folhas e ciclo diário de 9.000 páginas.',
@@ -392,9 +390,8 @@ export const productsData: ProductItem[] = [
     brand: 'Brother',
     modelType: 'Venda & Locação',
     images: [
-      'https://assets.brother.com/transform/eb2263d9-a78b-4c54-9721-a53d6d65cefa/13768_ADS1200_front-jpg',
-      'https://www.brother.com.br/-/media/brother/product-catalog-media/images/2020/10/20/02/47/ads1200_front.png',
       'https://support.brother.com/g/b/img/product/ads1200_us.jpg',
+      'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=1000&q=80',
     ],
     description:
       'Scanner portátil e veloz de até 25 ppm, alimentado via USB-C ou tomada, perfeito para balcões de atendimento, recepção e profissionais em trânsito.',
@@ -428,9 +425,8 @@ export const productsData: ProductItem[] = [
     brand: 'Brother',
     modelType: 'Venda & Locação',
     images: [
-      'https://assets.brother.com/transform/8ec9be8e-a906-4e5a-8b83-a9d554a93dc6/10940_QL800_front-jpg',
-      'https://www.brother.com.br/-/media/brother/product-catalog-media/images/2020/10/20/02/57/ql800_front.png',
       'https://support.brother.com/g/b/img/product/ql800_us.jpg',
+      'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1000&q=80',
     ],
     description:
       'Impressão térmica rápida de até 93 etiquetas por minuto com capacidade exclusiva de imprimir em preto e vermelho sem uso de tinta.',
@@ -461,9 +457,8 @@ export const productsData: ProductItem[] = [
     brand: 'Brother',
     modelType: 'Venda & Locação',
     images: [
-      'https://assets.brother.com/transform/fcdb8fbf-ef80-4fc7-bf84-f7b539bf5ad0/10942_QL820NWB_front-jpg',
-      'https://www.brother.com.br/-/media/brother/product-catalog-media/images/2020/10/20/02/57/ql820nwb_front.png',
       'https://support.brother.com/g/b/img/product/ql820nwb_us.jpg',
+      'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1000&q=80',
     ],
     description:
       'Conectividade total com Bluetooth, Wi-Fi, Ethernet e visor LCD retroiluminado para operação autônoma sem computador.',
@@ -493,9 +488,8 @@ export const productsData: ProductItem[] = [
     brand: 'Zebra',
     modelType: 'Locação & Venda',
     images: [
-      'https://www.zebra.com/content/dam/zebra_new_ia/en-us/solutions-verticals/product-portfolios/printers/desktop-printers/zd200-series/zd220d-zd220t-angle-view.png.transform/full-width/image.png',
-      'https://images.tcdn.com.br/img/img_prod/788118/impressora_de_etiquetas_zebra_zd220_termica_direta_usb_zd22012_d0ag00ez_1783_1_20200924151752.jpg',
-      'https://m.media-amazon.com/images/I/61E-F3294hL._AC_SL1500_.jpg',
+      '/zebra-printer.jpg',
+      'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1000&q=80',
     ],
     description:
       'Robusta, padrão da indústria logística e de gôndolas de supermercado com tecnologia de termotransferência e térmica direta.',
@@ -529,9 +523,8 @@ export const productsData: ProductItem[] = [
     brand: 'Brother',
     modelType: 'Venda',
     images: [
-      'https://assets.brother.com/transform/d9e2fb72-f67d-4c3e-8c34-8c82d49c6934/10492_PTH110_front-jpg',
-      'https://www.brother.com.br/-/media/brother/product-catalog-media/images/2020/10/20/02/56/pth110_front.png',
       'https://support.brother.com/g/b/img/product/pth110_us.jpg',
+      'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1000&q=80',
     ],
     description:
       'Rotulador portátil ergonômico com teclado QWERTY, teclas de atalho direto para fontes e molduras, e suporte a fitas laminadas TZe de alta durabilidade.',
@@ -562,9 +555,8 @@ export const productsData: ProductItem[] = [
     brand: 'Brother',
     modelType: 'Venda',
     images: [
-      'https://assets.brother.com/transform/1cbfdb7e-4091-4c46-ba25-05572e90c58e/9837_PTD210_front-jpg',
-      'https://www.brother.com.br/-/media/brother/product-catalog-media/images/2020/10/20/02/55/ptd210_front.png',
       'https://support.brother.com/g/b/img/product/ptd210_us.jpg',
+      'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1000&q=80',
     ],
     description:
       'Rotulador de mesa com teclas de formatação em um toque, 14 fontes, 97 molduras e armazenamento de até 30 etiquetas na memória interna.',
@@ -594,9 +586,8 @@ export const productsData: ProductItem[] = [
     brand: 'Brother',
     modelType: 'Venda & Locação',
     images: [
-      'https://assets.brother.com/transform/f7ef4003-ceaa-4ea7-9dd6-69d6c70dc07b/8292_PTE550W_front-jpg',
-      'https://www.brother.com.br/-/media/brother/product-catalog-media/images/2020/10/20/02/56/pte550w_front.png',
       'https://support.brother.com/g/b/img/product/pte550w_us.jpg',
+      'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1000&q=80',
     ],
     description:
       'Rotulador industrial reforçado para técnicos de TI, telecom e eletricistas com Wi-Fi, corte automático e maleta de transporte inclusa.',
@@ -630,9 +621,8 @@ export const productsData: ProductItem[] = [
     brand: 'Brother',
     modelType: 'Venda',
     images: [
-      'https://assets.brother.com/transform/a675ab03-a2dc-473d-8e6f-40e9d691bc2e/14878_SDX125_front-jpg',
-      'https://www.brother.com.br/-/media/brother/product-catalog-media/images/2020/10/20/02/58/sdx125_front.png',
       'https://support.brother.com/g/b/img/product/sdx125_us.jpg',
+      'https://images.unsplash.com/photo-1589739900243-4b52cd9b104e?auto=format&fit=crop&w=1000&q=80',
     ],
     description:
       'Máquina de corte e scanner embutido de 600 DPI com tecnologia de lâmina totalmente automática que corta materiais de até 3 mm de espessura.',
@@ -665,9 +655,8 @@ export const productsData: ProductItem[] = [
     brand: 'Brother',
     modelType: 'Venda',
     images: [
-      'https://assets.brother.com/transform/4b1509eb-b5ee-4ecf-a0dd-7d92e5917409/14879_SDX225_front-jpg',
-      'https://www.brother.com.br/-/media/brother/product-catalog-media/images/2020/10/20/02/58/sdx225_front.png',
       'https://support.brother.com/g/b/img/product/sdx225_us.jpg',
+      'https://images.unsplash.com/photo-1589739900243-4b52cd9b104e?auto=format&fit=crop&w=1000&q=80',
     ],
     description:
       'A versão topo de linha para produção contínua com 1.303 desenhos na memória, suporte a rolo de vinil e compatibilidade direta com arquivos PES/PHC de bordado.',
@@ -736,9 +725,8 @@ export const productsData: ProductItem[] = [
     brand: 'Dell',
     modelType: 'Venda',
     images: [
-      'https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-client-peripherals/keyboards/dell/km5221w/km5221w-kbu-01-bk.psd?fmt=png-alpha&pscan=auto&scl=1&hei=402&wid=602&qlt=100,0&resMode=sharp2&size=602,402',
-      'https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-client-peripherals/keyboards/dell/km5221w/km5221w-kbu-ms-02-bk.psd?fmt=png-alpha&pscan=auto&scl=1&hei=402&wid=602&qlt=100,0&resMode=sharp2&size=602,402',
       'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=1000&q=85',
+      'https://novo.rottatecnologia.com.br/wp-content/uploads/2024/06/teclado.jpg',
     ],
     description:
       'Combo premium com mouse ajustável até 4000 DPI via Dell Peripheral Manager, teclas de perfil baixo ultra silenciosas e acabamento refinado.',
@@ -767,8 +755,6 @@ export const productsData: ProductItem[] = [
     brand: 'Honeywell',
     modelType: 'Venda & Locação',
     images: [
-      'https://images.tcdn.com.br/img/img_prod/830219/leitor_de_codigo_de_barras_honeywell_voyager_1470g_2d_usb_2169_1_20201111161245.jpg',
-      'https://sps-support.honeywell.com/s/sfsites/c/resource/Voyager1400g/Voyager_1400g.jpg',
       'https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&w=1000&q=85',
     ],
     description:
@@ -798,8 +784,6 @@ export const productsData: ProductItem[] = [
     brand: 'Elgin',
     modelType: 'Venda & Locação',
     images: [
-      'https://elgin.vtexassets.com/arquivos/ids/156681-800-800?v=637722744833200000',
-      'https://images.tcdn.com.br/img/img_prod/705703/impressora_termica_de_cupom_elgin_i9_usb_guilhotina_917_1_20200813165215.jpg',
       'https://images.unsplash.com/photo-1556742111-a301076d9d18?auto=format&fit=crop&w=1000&q=85',
     ],
     description:

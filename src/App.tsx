@@ -6,6 +6,7 @@ import { ServicesPage } from './components/ServicesPage'
 import { ProductCatalog } from './components/ProductCatalog'
 import { ProductDetailPage } from './components/ProductDetailPage'
 import { ContactPage } from './components/ContactPage'
+import { ClientPortalPage } from './components/client-portal/ClientPortalPage'
 import { Footer } from './components/Footer'
 import { WhatsAppFloat } from './components/WhatsAppFloat'
 import { SiteProvider } from './context/SiteContext'
@@ -40,6 +41,8 @@ export default function App() {
         setCurrentPage('produtos')
       } else if (hash === '#/contato') {
         setCurrentPage('contato')
+      } else if (hash === '#/area-cliente') {
+        setCurrentPage('area-cliente')
       } else {
         setCurrentPage('home')
       }
@@ -74,6 +77,14 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  if (currentPage === 'area-cliente') {
+    return (
+      <SiteProvider>
+        <ClientPortalPage onNavigateHome={() => handleNavigate('home')} />
+      </SiteProvider>
+    )
+  }
+
   return (
     <SiteProvider>
       <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col selection:bg-blue-100 selection:text-rotta-navy">
@@ -104,7 +115,7 @@ export default function App() {
               onSelectProduct={handleSelectProduct}
             />
           ) : currentPage === 'contato' ? (
-            <ContactPage />
+            <ContactPage onNavigate={handleNavigate} />
           ) : null}
         </main>
 

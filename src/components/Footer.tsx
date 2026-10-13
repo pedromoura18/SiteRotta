@@ -1,7 +1,6 @@
 import {
   ArrowUp,
   Clock,
-  ExternalLink,
   Heart,
   Mail,
   MapPin,
@@ -273,16 +272,14 @@ export function Footer({ onNavigate }: FooterProps) {
             </div>
 
             <div className="pt-3">
-              <a
-                href={companyInfo.clientPortalUrl}
-                target="_blank"
-                rel="noreferrer"
+              <button
+                type="button"
+                onClick={() => onNavigate('area-cliente')}
                 className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-rotta-blue transition-colors"
               >
                 <User size={13} className="text-rotta-blue" />
                 <span>Acessar Área do Cliente</span>
-                <ExternalLink size={11} className="text-slate-400" />
-              </a>
+              </button>
             </div>
           </div>
         </div>

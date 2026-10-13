@@ -36,13 +36,39 @@ export function useScrollReveal() {
     }
 
     const observer = new IntersectionObserver(observerCallback, {
-      threshold: 0.12,
-      rootMargin: '0px 0px -50px 0px',
+      threshold: 0.05,
+      rootMargin: '0px 0px 50px 0px',
     })
 
-    const elements = document.querySelectorAll('.reveal-on-scroll')
-    elements.forEach((el) => observer.observe(el))
+    const observeNewElements = () => {
+      const elements = document.querySelectorAll('.reveal-on-scroll:not(.is-visible)')
+      elements.forEach((el) => {
+        // Se já estiver visível na janela, aplica is-visible imediatamente
+        const rect = el.getBoundingClientRect()
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          el.classList.add('is-visible')
+        } else {
+          observer.observe(el)
+        }
+      })
+    }
 
-    return () => observer.disconnect()
+    observeNewElements()
+
+    // Observa mudanças dinâmicas no DOM (ex: troca de abas de produtos)
+    const mutationObserver = new MutationObserver(() => {
+      observeNewElements()
+    })
+
+    mutationObserver.observe(document.body, { childList: true, subtree: true })
+
+    // Timeout de segurança para garantir visibilidade
+    const timer = setTimeout(observeNewElements, 100)
+
+    return () => {
+      clearTimeout(timer)
+      observer.disconnect()
+      mutationObserver.disconnect()
+    }
   }, [])
 }

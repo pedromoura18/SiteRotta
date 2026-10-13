@@ -405,9 +405,15 @@ export function HomePage({ onNavigate, onSelectProduct }: HomePageProps) {
               >
                 <div className="relative h-48 w-full overflow-hidden rounded-xl bg-white border border-slate-100 flex items-center justify-center p-3">
                   <img
-                    src={prod.images && prod.images.length > 0 ? prod.images[0] : '/placeholder.png'}
+                    src={prod.images && prod.images.length > 0 ? prod.images[0] : '/placeholder.svg'}
                     alt={prod.name}
                     loading="lazy"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      if (!target.src.includes('placeholder.svg')) {
+                        target.src = '/placeholder.svg'
+                      }
+                    }}
                     className="max-h-full max-w-full h-auto w-auto object-contain transition-transform duration-300 group-hover:scale-105 select-none"
                   />
                   <span className="absolute top-2 left-2 rounded-md bg-rotta-blue px-2 py-0.5 text-[10px] font-black uppercase text-white shadow-2xs">

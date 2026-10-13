@@ -209,9 +209,15 @@ export function ProductCatalog({ onSelectProduct, initialCategory = 'all' }: Pro
                   className="relative h-60 w-full cursor-pointer overflow-hidden bg-white flex items-center justify-center p-4 border-b border-slate-100 group-hover:bg-slate-50/60 transition-colors"
                 >
                   <img
-                    src={product.images && product.images.length > 0 ? product.images[0] : '/placeholder.png'}
+                    src={product.images && product.images.length > 0 ? product.images[0] : '/placeholder.svg'}
                     alt={product.name}
                     loading="lazy"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      if (!target.src.includes('placeholder.svg')) {
+                        target.src = '/placeholder.svg'
+                      }
+                    }}
                     className="max-h-full max-w-full h-auto w-auto object-contain transition-transform duration-500 group-hover:scale-105 select-none"
                   />
 

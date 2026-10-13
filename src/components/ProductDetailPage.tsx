@@ -37,7 +37,7 @@ export function ProductDetailPage({
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [productId])
 
-  const images = product.images && product.images.length > 0 ? product.images : ['/placeholder.png']
+  const images = product.images && product.images.length > 0 ? product.images : ['/placeholder.svg']
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length)
@@ -113,6 +113,12 @@ export function ProductDetailPage({
                 key={currentImageIndex}
                 src={images[currentImageIndex]}
                 alt={`${product.name} - Foto ${currentImageIndex + 1}`}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  if (!target.src.includes('placeholder.svg')) {
+                    target.src = '/placeholder.svg'
+                  }
+                }}
                 className="max-h-full max-w-full h-auto w-auto object-contain transition-all duration-300 animate-fadeIn select-none"
               />
 
@@ -173,6 +179,12 @@ export function ProductDetailPage({
                     <img
                       src={img}
                       alt={`Miniatura ${idx + 1}`}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement
+                        if (!target.src.includes('placeholder.svg')) {
+                          target.src = '/placeholder.svg'
+                        }
+                      }}
                       className="max-h-full max-w-full h-auto w-auto object-contain select-none"
                     />
                   </button>

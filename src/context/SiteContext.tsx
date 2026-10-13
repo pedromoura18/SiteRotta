@@ -103,7 +103,26 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!isMounted) return
 
         if (Array.isArray(sanityProducts) && sanityProducts.length > 0) {
-          setProductsData(sanityProducts)
+          const mergedProducts = defaultProductsData.map((dp) => {
+            const sp = sanityProducts.find((p) => p.id === dp.id)
+            if (!sp) return dp
+
+            const hasValidSanityImages =
+              Array.isArray(sp.images) &&
+              sp.images.length > 0 &&
+              sp.images.some((img) => typeof img === 'string' && img.trim().length > 0)
+
+            return {
+              ...dp,
+              ...sp,
+              images: hasValidSanityImages ? sp.images : dp.images,
+            }
+          })
+
+          const defaultIds = new Set(defaultProductsData.map((p) => p.id))
+          const additionalSanity = sanityProducts.filter((p) => !defaultIds.has(p.id))
+
+          setProductsData([...mergedProducts, ...additionalSanity])
         }
 
         if (sanityCompany && Object.keys(sanityCompany).length > 0) {

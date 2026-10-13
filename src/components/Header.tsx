@@ -3,7 +3,6 @@ import {
   Building2,
   ChevronDown,
   ChevronRight,
-  ExternalLink,
   Home,
   Layers,
   Mail,
@@ -25,7 +24,7 @@ import {
 import { BrandMark } from './BrandMark'
 import { useSiteData } from '../context/SiteContext'
 
-export type NavPage = 'home' | 'sobre' | 'servicos' | 'produtos' | 'contato'
+export type NavPage = 'home' | 'sobre' | 'servicos' | 'produtos' | 'contato' | 'area-cliente'
 
 interface HeaderProps {
   currentPage: NavPage
@@ -188,16 +187,18 @@ export function Header({ currentPage, onNavigate }: HeaderProps) {
               Seg - Sex: 8h às 18h
             </span>
             <div className="h-3 w-px bg-slate-200 hidden lg:block" />
-            <a
-              href={companyInfo.clientPortalUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-white border border-slate-200 px-3 py-1 font-bold text-slate-700 shadow-2xs transition-all hover:border-rotta-blue hover:text-rotta-blue"
+            <button
+              type="button"
+              onClick={() => onNavigate('area-cliente')}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 font-bold transition-all shadow-2xs ${
+                currentPage === 'area-cliente'
+                  ? 'bg-rotta-blue text-white border-rotta-blue'
+                  : 'bg-white border-slate-200 text-slate-700 hover:border-rotta-blue hover:text-rotta-blue'
+              }`}
             >
-              <User size={13} className="text-rotta-blue" />
+              <User size={13} className={currentPage === 'area-cliente' ? 'text-white' : 'text-rotta-blue'} />
               <span>Área do Cliente</span>
-              <ExternalLink size={11} className="text-slate-400" />
-            </a>
+            </button>
           </div>
         </div>
       </div>
@@ -281,15 +282,18 @@ export function Header({ currentPage, onNavigate }: HeaderProps) {
 
           {/* Botões de Ação Direta */}
           <div className="flex items-center gap-3">
-            <a
-              href={companyInfo.clientPortalUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="hidden xl:inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-2.5 text-xs font-bold text-slate-700 transition-all hover:bg-slate-100 hover:text-rotta-blue"
+            <button
+              type="button"
+              onClick={() => onNavigate('area-cliente')}
+              className={`hidden xl:inline-flex items-center gap-1.5 rounded-xl border px-4 py-2.5 text-xs font-bold transition-all ${
+                currentPage === 'area-cliente'
+                  ? 'bg-rotta-blue text-white border-rotta-blue shadow-sm'
+                  : 'border-slate-200 bg-slate-50/70 text-slate-700 hover:bg-slate-100 hover:text-rotta-blue'
+              }`}
             >
-              <User size={16} className="text-rotta-blue" />
+              <User size={16} className={currentPage === 'area-cliente' ? 'text-white' : 'text-rotta-blue'} />
               <span>Portal do Cliente</span>
-            </a>
+            </button>
 
             <a
               href={companyInfo.whatsappUrl}
@@ -494,15 +498,14 @@ export function Header({ currentPage, onNavigate }: HeaderProps) {
               })}
 
               <div className="pt-4 mt-2 border-t border-slate-100 space-y-3">
-                <a
-                  href={companyInfo.clientPortalUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 py-3 text-sm font-bold text-slate-700"
+                <button
+                  type="button"
+                  onClick={() => handleNavClick('area-cliente')}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100"
                 >
                   <User size={18} className="text-rotta-blue" />
                   <span>Acessar Área do Cliente</span>
-                </a>
+                </button>
 
                 <a
                   href={companyInfo.whatsappUrl}
