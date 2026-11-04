@@ -18,7 +18,6 @@ import {
   Tag,
 } from 'lucide-react'
 import { PartnerLogos } from './PartnerLogos'
-import { RoiCalculator } from './RoiCalculator'
 import { useSiteData } from '../context/SiteContext'
 import { useScrollReveal, useParallax } from '../utils/useParallax'
 import type { NavPage } from './Header'
@@ -525,14 +524,7 @@ export function HomePage({ onNavigate, onSelectProduct }: HomePageProps) {
       </section>
 
       {/* =========================================
-          6. SIMULADOR INTERATIVO DE ECONOMIA (ROI)
-         ========================================= */}
-      <section className="py-16 bg-white border-b border-slate-200">
-        <RoiCalculator />
-      </section>
-
-      {/* =========================================
-          7. BANNER CTA FINAL
+          6. BANNER CTA FINAL
          ========================================= */}
       <section className="py-16 bg-gradient-to-r from-rotta-navy via-rotta-blue-dark to-rotta-blue text-white">
         <div className="container-shell text-center max-w-3xl space-y-6">

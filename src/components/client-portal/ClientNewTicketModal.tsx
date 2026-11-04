@@ -6,6 +6,7 @@ import type {
   TicketCategory,
   TicketPriority,
 } from '../../types/clientPortal'
+import { getEquipmentImage } from '../../data/mockClientData'
 
 interface ClientNewTicketModalProps {
   isOpen: boolean
@@ -33,6 +34,8 @@ export function ClientNewTicketModal({
   const [requesterPhone, setRequesterPhone] = useState('')
   const [error, setError] = useState<string | null>(null)
 
+  const selectedEq = equipments.find((eq) => eq.id === equipmentId)
+
   if (!isOpen) return null
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -59,7 +62,6 @@ export function ClientNewTicketModal({
       return
     }
 
-    const selectedEq = equipments.find((eq) => eq.id === equipmentId)
     const eqName = selectedEq ? selectedEq.model : 'Equipamento Geral'
     const assetTag = selectedEq ? selectedEq.assetTag : 'N/A'
     const department = selectedEq ? selectedEq.department : 'Geral'
@@ -76,6 +78,8 @@ export function ClientNewTicketModal({
 
     const newTicket: ClientTicket = {
       id: `tkt-${Date.now()}`,
+      companyId: selectedEq?.companyId || 'cli-001',
+      companyName: selectedEq?.companyName || 'Alpha Logística',
       protocol: newProtocol,
       createdAt: `${nowFormatted}`,
       equipmentId,
@@ -160,6 +164,34 @@ export function ClientNewTicketModal({
                 ))}
               </select>
             </div>
+
+            {/* Foto e Detalhes do Equipamento Selecionado */}
+            {selectedEq && (
+              <div className="mt-2.5 flex items-center gap-3.5 p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
+                <div className="w-14 h-14 rounded-xl bg-white p-1 border border-slate-200 shrink-0 flex items-center justify-center overflow-hidden">
+                  <img
+                    src={selectedEq.image || getEquipmentImage(selectedEq.model || selectedEq.id)}
+                    alt={selectedEq.model}
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      ;(e.currentTarget as HTMLImageElement).src = '/products/brother-mfc-l6902dw.jpg'
+                    }}
+                  />
+                </div>
+                <div className="text-xs min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold text-rotta-blue bg-blue-50 px-2 py-0.5 rounded text-[11px] border border-blue-100">
+                      {selectedEq.assetTag}
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-500">
+                      {selectedEq.department}
+                    </span>
+                  </div>
+                  <p className="font-bold text-slate-900 text-sm mt-0.5 truncate">{selectedEq.model}</p>
+                  <p className="text-slate-400 font-mono text-[10px]">S/N: {selectedEq.serialNumber}</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Categoria e Prioridade */}

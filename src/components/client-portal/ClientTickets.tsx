@@ -7,9 +7,9 @@ import {
   CheckCircle2,
   AlertCircle,
   ChevronRight,
-  Printer,
 } from 'lucide-react'
 import type { ClientTicket, TicketStatus } from '../../types/clientPortal'
+import { getEquipmentImage } from '../../data/mockClientData'
 
 interface ClientTicketsProps {
   tickets: ClientTicket[]
@@ -191,18 +191,33 @@ export function ClientTickets({
                 </div>
 
                 <div className="mt-3 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <h4 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-rotta-blue transition-colors">
-                      {ticket.title}
-                    </h4>
-                    <p className="text-xs text-slate-500 line-clamp-1">{ticket.description}</p>
-                    <div className="flex items-center gap-4 text-xs text-slate-600 pt-1">
-                      <span className="inline-flex items-center gap-1">
-                        <Printer size={13} className="text-rotta-blue" />
-                        <strong>{ticket.equipmentName}</strong> ({ticket.assetTag})
-                      </span>
-                      <span>•</span>
-                      <span>{ticket.department}</span>
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="w-14 h-14 rounded-2xl bg-slate-50 p-1 border border-slate-200/80 shrink-0 flex items-center justify-center overflow-hidden">
+                      <img
+                        src={getEquipmentImage(ticket.equipmentName || ticket.equipmentId)}
+                        alt={ticket.equipmentName}
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform"
+                        onError={(e) => {
+                          ;(e.currentTarget as HTMLImageElement).src = '/products/brother-mfc-l6902dw.jpg'
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-1 min-w-0">
+                      <h4 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-rotta-blue transition-colors truncate">
+                        {ticket.title}
+                      </h4>
+                      <p className="text-xs text-slate-500 line-clamp-1">{ticket.description}</p>
+                      <div className="flex items-center gap-3 text-xs text-slate-600 pt-1 flex-wrap">
+                        <span className="font-semibold text-slate-800">
+                          {ticket.equipmentName}
+                        </span>
+                        <span>•</span>
+                        <span className="font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded text-[11px] font-bold">
+                          {ticket.assetTag}
+                        </span>
+                        <span>•</span>
+                        <span className="text-slate-500">{ticket.department}</span>
+                      </div>
                     </div>
                   </div>
 

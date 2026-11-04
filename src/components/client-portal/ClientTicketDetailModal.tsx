@@ -8,9 +8,9 @@ import {
   AlertCircle,
   MessageSquare,
   Send,
-  Printer,
 } from 'lucide-react'
 import type { ClientTicket } from '../../types/clientPortal'
+import { getEquipmentImage } from '../../data/mockClientData'
 
 interface ClientTicketDetailModalProps {
   ticket: ClientTicket | null
@@ -97,17 +97,28 @@ export function ClientTicketDetailModal({
 
         {/* Informações do Equipamento e Atendimento */}
         <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 rounded-2xl p-4 border border-slate-200/80 text-xs">
-          <div className="flex items-center gap-2 text-slate-700">
-            <Printer size={16} className="text-rotta-blue shrink-0" />
+          <div className="flex items-center gap-3 text-slate-700">
+            <div className="w-14 h-14 rounded-xl bg-white p-1 border border-slate-200 shrink-0 flex items-center justify-center overflow-hidden">
+              <img
+                src={getEquipmentImage(ticket.equipmentName || ticket.equipmentId)}
+                alt={ticket.equipmentName}
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  ;(e.currentTarget as HTMLImageElement).src = '/products/brother-mfc-l6902dw.jpg'
+                }}
+              />
+            </div>
             <div>
-              <p className="font-semibold text-slate-900">{ticket.equipmentName}</p>
-              <p className="text-slate-500">
+              <p className="font-bold text-slate-900 text-sm">{ticket.equipmentName}</p>
+              <p className="text-slate-500 font-mono">
                 {ticket.assetTag} • {ticket.department}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-slate-700">
-            <User size={16} className="text-rotta-blue shrink-0" />
+          <div className="flex items-center gap-3 text-slate-700">
+            <div className="w-10 h-10 rounded-xl bg-blue-100 text-rotta-blue flex items-center justify-center shrink-0">
+              <User size={18} />
+            </div>
             <div>
               <p className="font-semibold text-slate-900">
                 {ticket.assignedTech || 'Equipe de Suporte Rotta'}

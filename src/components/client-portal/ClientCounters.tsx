@@ -7,6 +7,7 @@ import {
   History,
 } from 'lucide-react'
 import type { ClientEquipment, CounterReading } from '../../types/clientPortal'
+import { getEquipmentImage } from '../../data/mockClientData'
 
 interface ClientCountersProps {
   equipments: ClientEquipment[]
@@ -64,6 +65,8 @@ export function ClientCounters({
 
       return {
         id: `cnt-${Date.now()}-${eq.id}`,
+        companyId: eq.companyId || 'cli-001',
+        companyName: eq.companyName || 'Alpha Logística',
         equipmentId: eq.id,
         equipmentName: eq.model,
         assetTag: eq.assetTag,
@@ -138,16 +141,30 @@ export function ClientCounters({
                 key={eq.id}
                 className="p-5 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-3"
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold bg-white text-rotta-blue px-2.5 py-0.5 rounded-md border border-slate-200">
-                      {eq.assetTag}
-                    </span>
-                    <h4 className="text-sm font-bold text-slate-900">{eq.model}</h4>
-                    <span className="text-xs text-slate-500">({eq.department})</span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-white p-1 border border-slate-200/90 shrink-0 flex items-center justify-center overflow-hidden">
+                      <img
+                        src={eq.image || getEquipmentImage(eq.model || eq.id)}
+                        alt={eq.model}
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          ;(e.currentTarget as HTMLImageElement).src = '/products/brother-mfc-l6902dw.jpg'
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-bold bg-white text-rotta-blue px-2.5 py-0.5 rounded-md border border-slate-200">
+                          {eq.assetTag}
+                        </span>
+                        <h4 className="text-sm font-bold text-slate-900">{eq.model}</h4>
+                      </div>
+                      <span className="text-xs text-slate-500">{eq.department} • S/N: {eq.serialNumber}</span>
+                    </div>
                   </div>
-                  <span className="text-xs text-slate-400">
-                    Última leitura registrada: {eq.currentCounterMono.toLocaleString('pt-BR')} págs
+                  <span className="text-xs text-slate-400 font-mono">
+                    Última leitura: {eq.currentCounterMono.toLocaleString('pt-BR')} págs
                   </span>
                 </div>
 

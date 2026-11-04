@@ -20,6 +20,7 @@ import type {
   SupplyOrder,
   ClientInvoice,
 } from '../../types/clientPortal'
+import { getEquipmentImage } from '../../data/mockClientData'
 
 interface ClientDashboardProps {
   company: ClientCompany
@@ -90,15 +91,25 @@ export function ClientDashboard({
       {/* Alerta Inteligente de Toner Baixo (se houver) */}
       {lowTonerEquipments.length > 0 && (
         <div className="rounded-2xl bg-amber-50 border border-amber-200/90 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
-          <div className="flex items-start gap-3">
-            <div className="rounded-xl bg-amber-100 p-2 text-amber-700 shrink-0">
-              <AlertTriangle size={18} />
+          <div className="flex items-center gap-3.5">
+            <div className="w-14 h-14 rounded-xl bg-white p-1 border border-amber-200/90 shrink-0 flex items-center justify-center overflow-hidden shadow-2xs">
+              <img
+                src={lowTonerEquipments[0].image || getEquipmentImage(lowTonerEquipments[0].model)}
+                alt={lowTonerEquipments[0].model}
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  ;(e.currentTarget as HTMLImageElement).src = '/products/brother-mfc-l6902dw.jpg'
+                }}
+              />
             </div>
             <div>
-              <h4 className="font-bold text-amber-900 text-sm">
-                Alerta de Consumível em Nível Baixo
-              </h4>
-              <p className="text-amber-800 mt-0.5">
+              <div className="flex items-center gap-1.5 text-amber-800 font-bold mb-0.5">
+                <AlertTriangle size={15} className="text-amber-600" />
+                <h4 className="text-sm font-bold text-amber-900">
+                  Alerta de Consumível em Nível Baixo
+                </h4>
+              </div>
+              <p className="text-amber-800">
                 O equipamento <strong className="font-semibold">{lowTonerEquipments[0].model}</strong> (
                 {lowTonerEquipments[0].assetTag} - {lowTonerEquipments[0].department}) está com{' '}
                 <strong className="text-rose-700">{lowTonerEquipments[0].tonerBlack}%</strong> de toner
@@ -294,31 +305,45 @@ export function ClientDashboard({
           <div className="space-y-3">
             {tickets.slice(0, 3).map((ticket) => {
               const isClosed = ticket.status === 'concluido'
+              const prodImg = getEquipmentImage(ticket.equipmentName || ticket.equipmentId)
+
               return (
                 <div
                   key={ticket.id}
                   onClick={() => onSelectTicket(ticket)}
-                  className="cursor-pointer p-4 rounded-2xl border border-slate-100 hover:border-slate-300 hover:bg-slate-50/60 transition-all flex items-start justify-between gap-3 text-xs"
+                  className="cursor-pointer p-3.5 rounded-2xl border border-slate-100 hover:border-slate-300 hover:bg-slate-50/60 transition-all flex items-center justify-between gap-3 text-xs group"
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
-                        {ticket.protocol}
-                      </span>
-                      <span
-                        className={`font-semibold px-2 py-0.5 rounded-full text-[10px] ${
-                          isClosed
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : 'bg-blue-50 text-blue-700'
-                        }`}
-                      >
-                        {isClosed ? 'Concluído' : 'Em Atendimento'}
-                      </span>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-12 h-12 rounded-xl bg-slate-50 p-1 border border-slate-200/80 shrink-0 flex items-center justify-center overflow-hidden">
+                      <img
+                        src={prodImg}
+                        alt={ticket.equipmentName}
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform"
+                        onError={(e) => {
+                          ;(e.currentTarget as HTMLImageElement).src = '/products/brother-mfc-l6902dw.jpg'
+                        }}
+                      />
                     </div>
-                    <p className="font-bold text-slate-900 text-sm">{ticket.title}</p>
-                    <p className="text-slate-500 text-[11px]">
-                      {ticket.equipmentName} • {ticket.department}
-                    </p>
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+                          {ticket.protocol}
+                        </span>
+                        <span
+                          className={`font-semibold px-2 py-0.5 rounded-full text-[10px] ${
+                            isClosed
+                              ? 'bg-emerald-50 text-emerald-700'
+                              : 'bg-blue-50 text-blue-700'
+                          }`}
+                        >
+                          {isClosed ? 'Concluído' : 'Em Atendimento'}
+                        </span>
+                      </div>
+                      <p className="font-bold text-slate-900 text-sm truncate">{ticket.title}</p>
+                      <p className="text-slate-500 text-[11px] truncate">
+                        {ticket.equipmentName} • {ticket.department}
+                      </p>
+                    </div>
                   </div>
 
                   <span className="text-[11px] text-slate-400 shrink-0">{ticket.createdAt}</span>
@@ -332,11 +357,11 @@ export function ClientDashboard({
         <div className="lg:col-span-5 rounded-3xl bg-white p-6 border border-slate-200/90 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-              <div className="w-12 h-12 rounded-2xl bg-blue-100 text-rotta-blue flex items-center justify-center font-bold text-lg">
-                RR
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rotta-navy to-rotta-blue text-white flex items-center justify-center font-black text-base shadow-sm">
+                DR
               </div>
               <div>
-                <h4 className="text-sm font-bold text-slate-900">{company.accountManager}</h4>
+                <h4 className="text-sm font-bold text-slate-900">{company.accountManager || 'Douglas Rotta'}</h4>
                 <p className="text-xs text-slate-500">Gestor de Atendimento Corporativo</p>
               </div>
             </div>
@@ -352,20 +377,22 @@ export function ClientDashboard({
               </div>
               <div className="flex items-center gap-2">
                 <Phone size={16} className="text-rotta-blue shrink-0" />
-                <span>Telefone Direto: {company.managerPhone}</span>
+                <span>Telefone Direto: {company.managerPhone || '(46) 98803-7656'}</span>
               </div>
             </div>
           </div>
 
           <div className="mt-6 pt-4 border-t border-slate-100 space-y-2">
             <a
-              href="https://wa.me/554734518200"
+              href={`https://api.whatsapp.com/send?phone=5546988037656&text=${encodeURIComponent(
+                `Olá Douglas Rotta! Sou ${company.contactPerson} da ${company.name} e gostaria de um suporte técnico.`
+              )}`}
               target="_blank"
               rel="noreferrer"
               className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 text-xs font-bold transition-colors shadow-2xs"
             >
               <MessageCircle size={16} />
-              <span>Chamar Gestor no WhatsApp</span>
+              <span>Chamar Douglas Rotta no WhatsApp</span>
             </a>
           </div>
         </div>

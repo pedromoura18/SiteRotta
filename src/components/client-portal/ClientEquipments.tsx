@@ -1,5 +1,4 @@
 import {
-  Printer,
   Package,
   Wrench,
   CheckCircle2,
@@ -8,6 +7,7 @@ import {
   Gauge,
 } from 'lucide-react'
 import type { ClientEquipment } from '../../types/clientPortal'
+import { getEquipmentImage } from '../../data/mockClientData'
 
 interface ClientEquipmentsProps {
   equipments: ClientEquipment[]
@@ -47,15 +47,29 @@ export function ClientEquipments({
           return (
             <div
               key={eq.id}
-              className="rounded-3xl bg-white border border-slate-200/90 shadow-2xs p-6 flex flex-col justify-between hover:shadow-md transition-shadow space-y-5"
+              className="rounded-3xl bg-white border border-slate-200/90 shadow-2xs p-6 flex flex-col justify-between hover:shadow-md transition-shadow space-y-5 group"
             >
               <div>
-                {/* Cabeçalho do Card */}
-                <div className="flex items-start justify-between gap-3 pb-4 border-b border-slate-100">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
+                {/* Cabeçalho do Card com Foto Real do Equipamento */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 pb-4 border-b border-slate-100">
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-b from-slate-50 to-slate-100 p-2 border border-slate-200/80 shrink-0 flex items-center justify-center overflow-hidden shadow-2xs group-hover:scale-105 transition-transform">
+                    <img
+                      src={eq.image || getEquipmentImage(eq.model || eq.id)}
+                      alt={eq.model}
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        ;(e.currentTarget as HTMLImageElement).src = '/products/brother-mfc-l6902dw.jpg'
+                      }}
+                    />
+                  </div>
+
+                  <div className="flex-1 space-y-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-mono text-xs font-extrabold bg-blue-50 text-rotta-blue px-2.5 py-0.5 rounded-lg border border-blue-100">
                         {eq.assetTag}
+                      </span>
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                        {eq.brand}
                       </span>
                       <span
                         className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full ${
@@ -78,12 +92,10 @@ export function ClientEquipments({
                       </span>
                     </div>
 
-                    <h3 className="text-lg font-bold text-slate-900 mt-1">{eq.model}</h3>
-                    <p className="text-xs text-slate-400 font-mono">S/N: {eq.serialNumber}</p>
-                  </div>
-
-                  <div className="rounded-2xl bg-slate-50 p-3 text-slate-600 border border-slate-200/60">
-                    <Printer size={24} className="text-rotta-blue" />
+                    <h3 className="text-base sm:text-lg font-extrabold text-slate-900 mt-1 leading-snug">
+                      {eq.model}
+                    </h3>
+                    <p className="text-xs text-slate-400 font-mono">Nº Série: {eq.serialNumber}</p>
                   </div>
                 </div>
 

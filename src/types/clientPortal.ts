@@ -14,10 +14,14 @@ export interface ClientCompany {
   accountManager: string
   managerPhone: string
   slaHours: number
+  totalPrinters: number
+  monthlyContractValue: number
 }
 
 export interface ClientEquipment {
   id: string
+  companyId: string
+  companyName?: string
   model: string
   brand: string
   type: 'impressora' | 'multifuncional' | 'etiquetadora' | 'computador'
@@ -33,6 +37,8 @@ export interface ClientEquipment {
   tonerMagenta?: number
   tonerYellow?: number
   drumLife: number // 0 a 100%
+  ipAddress?: string // IP da rede local para telemetria SNMP
+  snmpStatus?: 'online' | 'offline' | 'warning'
   image?: string
 }
 
@@ -59,6 +65,8 @@ export interface TicketUpdate {
 
 export interface ClientTicket {
   id: string
+  companyId: string
+  companyName?: string
   protocol: string
   createdAt: string
   equipmentId: string
@@ -90,6 +98,8 @@ export type SupplyOrderStatus = 'solicitado' | 'separacao' | 'em_transito' | 'en
 
 export interface SupplyOrder {
   id: string
+  companyId: string
+  companyName?: string
   code: string
   createdAt: string
   equipmentId: string
@@ -107,6 +117,8 @@ export interface SupplyOrder {
 
 export interface CounterReading {
   id: string
+  companyId: string
+  companyName?: string
   equipmentId: string
   equipmentName: string
   assetTag: string
@@ -121,6 +133,8 @@ export interface CounterReading {
 
 export interface ClientInvoice {
   id: string
+  companyId: string
+  companyName?: string
   invoiceNumber: string
   period: string // ex: "Outubro / 2026"
   dueDate: string
@@ -129,4 +143,12 @@ export interface ClientInvoice {
   pixCode: string
   barCode: string
   paidAt?: string
+}
+
+export type PortalSessionRole = 'client' | 'admin'
+
+export interface PortalSession {
+  role: PortalSessionRole
+  company: ClientCompany // Empresa selecionada para visualização
+  adminName?: string // "Douglas Rotta"
 }

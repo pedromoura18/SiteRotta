@@ -4,11 +4,11 @@ import {
   Truck,
   CheckCircle2,
   Clock,
-  Printer,
   MapPin,
   Calendar,
 } from 'lucide-react'
 import type { SupplyOrder, SupplyOrderStatus } from '../../types/clientPortal'
+import { getEquipmentImage } from '../../data/mockClientData'
 
 interface ClientSuppliesProps {
   supplies: SupplyOrder[]
@@ -127,10 +127,21 @@ export function ClientSupplies({ supplies, onOpenNewSupply }: ClientSuppliesProp
                     Destino & Previsão:
                   </h4>
                   <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
-                    <div className="flex items-start gap-2 text-slate-700">
-                      <Printer size={14} className="text-rotta-blue shrink-0 mt-0.5" />
-                      <div>
-                        <span className="font-semibold text-slate-900">{order.equipmentName}</span>
+                    <div className="flex items-center gap-3 text-slate-700 bg-white p-2.5 rounded-xl border border-slate-200/70">
+                      <div className="w-12 h-12 rounded-lg bg-slate-50 p-1 border border-slate-200/80 shrink-0 flex items-center justify-center overflow-hidden">
+                        <img
+                          src={getEquipmentImage(order.equipmentName || order.equipmentId)}
+                          alt={order.equipmentName}
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            ;(e.currentTarget as HTMLImageElement).src = '/products/brother-mfc-l6902dw.jpg'
+                          }}
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] uppercase font-bold text-slate-400">Equipamento de Destino</p>
+                        <p className="font-bold text-slate-900 truncate">{order.equipmentName}</p>
+                        <p className="text-[11px] text-slate-500 font-mono">{order.assetTag}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-2 text-slate-600">
