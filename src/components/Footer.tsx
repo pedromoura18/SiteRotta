@@ -7,6 +7,7 @@ import {
   MessageCircle,
   PhoneCall,
   User,
+  Lock,
 } from 'lucide-react'
 import { BrandMark } from './BrandMark'
 import { FacebookIcon, InstagramIcon, LinkedinIcon } from './SocialIcons'
@@ -286,9 +287,21 @@ export function Footer({ onNavigate }: FooterProps) {
 
         {/* ─── Linha de Copyright ─── */}
         <div className="mt-12 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <p>
-            Rotta Tecnologia © 2016 - {new Date().getFullYear()} Todos os direitos reservados.
-          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <p>
+              Rotta Tecnologia © 2016 - {new Date().getFullYear()} Todos os direitos reservados.
+            </p>
+            <span className="text-slate-300 hidden sm:inline">•</span>
+            <button
+              type="button"
+              onClick={() => onNavigate('diretoria')}
+              className="text-slate-400 hover:text-slate-600 transition-colors inline-flex items-center gap-1 text-[11px]"
+              title="Acesso Restrito à Diretoria"
+            >
+              <Lock size={11} />
+              <span>Gestão Interna</span>
+            </button>
+          </div>
 
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">

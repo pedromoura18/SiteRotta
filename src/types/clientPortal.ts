@@ -151,4 +151,7 @@ export interface PortalSession {
   role: PortalSessionRole
   company: ClientCompany // Empresa selecionada para visualização
   adminName?: string // "Douglas Rotta"
+  token?: string // Token seguro JWT com assinatura criptográfica
+  expiresAt?: number // Timestamp de expiração
+  loginTimestamp?: string
 }

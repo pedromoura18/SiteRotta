@@ -43,6 +43,8 @@ export default function App() {
         setCurrentPage('contato')
       } else if (hash === '#/area-cliente') {
         setCurrentPage('area-cliente')
+      } else if (hash === '#/diretoria' || hash === '#/admin') {
+        setCurrentPage('diretoria')
       } else {
         setCurrentPage('home')
       }
@@ -77,10 +79,13 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  if (currentPage === 'area-cliente') {
+  if (currentPage === 'area-cliente' || currentPage === 'diretoria') {
     return (
       <SiteProvider>
-        <ClientPortalPage onNavigateHome={() => handleNavigate('home')} />
+        <ClientPortalPage
+          onNavigateHome={() => handleNavigate('home')}
+          initialRole={currentPage === 'diretoria' ? 'director' : 'client'}
+        />
       </SiteProvider>
     )
   }

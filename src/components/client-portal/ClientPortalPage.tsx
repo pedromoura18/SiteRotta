@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { BrandMark } from '../BrandMark'
 import { ClientLogin } from './ClientLogin'
+import { DirectorLogin } from './DirectorLogin'
 import { ClientDashboard } from './ClientDashboard'
 import { ClientTickets } from './ClientTickets'
 import { ClientNewTicketModal } from './ClientNewTicketModal'
@@ -60,12 +61,22 @@ export type PortalTab =
 
 interface ClientPortalPageProps {
   onNavigateHome: () => void
+  initialRole?: 'client' | 'director'
 }
 
-export function ClientPortalPage({ onNavigateHome }: ClientPortalPageProps) {
+export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPageProps) {
   // Estado de Autenticação (Sessão do Portal)
   const [session, setSession] = useState<PortalSession | null>(() => getPortalSession())
   const company = session?.company || null
+
+  // Modo de visualização de Login (Cliente vs Dono / Diretoria)
+  const [loginView, setLoginView] = useState<'client' | 'director'>(() => {
+    if (initialRole === 'director') return 'director'
+    if (typeof window !== 'undefined' && (window.location.hash === '#/diretoria' || window.location.hash === '#/admin')) {
+      return 'director'
+    }
+    return 'client'
+  })
 
   // Aba ativa
   const [activeTab, setActiveTab] = useState<PortalTab>('dashboard')
@@ -97,22 +108,26 @@ export function ClientPortalPage({ onNavigateHome }: ClientPortalPageProps) {
   }
 
   // Handlers de Login / Logout
-  const handleLoginClient = (loggedCompany: ClientCompany) => {
+  const handleLoginClient = (loggedCompany: ClientCompany, token?: string) => {
     const newSession: PortalSession = {
       role: 'client',
       company: loggedCompany,
       adminName: 'Douglas Rotta',
+      token,
+      loginTimestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
     }
     setSession(newSession)
     savePortalSession(newSession)
     showToast(`Bem-vindo ao Portal do Cliente, ${loggedCompany.name}!`)
   }
 
-  const handleLoginAdmin = () => {
+  const handleLoginAdmin = (token?: string) => {
     const newSession: PortalSession = {
       role: 'admin',
       company: ALL_CLIENT_COMPANIES[0],
       adminName: 'Douglas Rotta',
+      token,
+      loginTimestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
     }
     setSession(newSession)
     savePortalSession(newSession)
@@ -267,13 +282,31 @@ export function ClientPortalPage({ onNavigateHome }: ClientPortalPageProps) {
     setIsNewTicketOpen(true)
   }
 
-  // Se não estiver logado, exibe tela de login
+  // Se não estiver logado, exibe tela de login (Cliente vs Diretoria)
   if (!session || !company) {
+    if (loginView === 'director') {
+      return (
+        <DirectorLogin
+          onLoginAdmin={handleLoginAdmin}
+          onBackToClientLogin={() => {
+            setLoginView('client')
+            if (window.location.hash === '#/diretoria' || window.location.hash === '#/admin') {
+              window.location.hash = '#/area-cliente'
+            }
+          }}
+          onBackToSite={onNavigateHome}
+        />
+      )
+    }
+
     return (
       <ClientLogin
         onLoginClient={handleLoginClient}
-        onLoginAdmin={handleLoginAdmin}
         onBackToSite={onNavigateHome}
+        onNavigateDirector={() => {
+          setLoginView('director')
+          window.location.hash = '#/diretoria'
+        }}
       />
     )
   }

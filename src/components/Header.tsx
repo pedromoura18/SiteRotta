@@ -24,7 +24,7 @@ import {
 import { BrandMark } from './BrandMark'
 import { useSiteData } from '../context/SiteContext'
 
-export type NavPage = 'home' | 'sobre' | 'servicos' | 'produtos' | 'contato' | 'area-cliente'
+export type NavPage = 'home' | 'sobre' | 'servicos' | 'produtos' | 'contato' | 'area-cliente' | 'diretoria'
 
 interface HeaderProps {
   currentPage: NavPage
