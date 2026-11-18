@@ -8,7 +8,6 @@ import { ProductDetailPage } from './components/ProductDetailPage'
 import { ContactPage } from './components/ContactPage'
 import { ClientPortalPage } from './components/client-portal/ClientPortalPage'
 import { Footer } from './components/Footer'
-import { WhatsAppFloat } from './components/WhatsAppFloat'
 import { SiteProvider } from './context/SiteContext'
 import type { NavPage } from './components/Header'
 
@@ -126,9 +125,6 @@ export default function App() {
 
         {/* Rodapé Moderno com Links e Redes Sociais */}
         <Footer onNavigate={handleNavigate} />
-
-        {/* Botão Flutuante de WhatsApp Oficial */}
-        <WhatsAppFloat />
       </div>
     </SiteProvider>
   )

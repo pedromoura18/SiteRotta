@@ -170,7 +170,7 @@ export interface ProductItem {
 
 export const productsData: ProductItem[] = [
   // ==========================================
-  // IMPRESSORAS & MULTIFUNCIONAIS (Brother / Epson)
+  // IMPRESSORAS & MULTIFUNCIONAIS (Brother / Kyocera / HP / Epson)
   // ==========================================
   {
     id: 'brother-mfc-l6902dw',
@@ -179,13 +179,9 @@ export const productsData: ProductItem[] = [
     categoryLabel: 'Impressoras & Multifuncionais',
     brand: 'Brother',
     modelType: 'Locação & Venda',
-    images: [
-      'https://support.brother.com/g/b/img/product/mfcl6902dw_us.jpg',
-      'https://images.tcdn.com.br/img/img_prod/1289519/multifuncional_laser_brother_mfc_l6902dw_715_1_09dc2546f2d432ca4613aa86c679ac79.png',
-      'https://copierdigital.com.br/wp-content/uploads/2021/09/mfcl6902dw_0.png',
-    ],
+    images: ['/products/brother-mfc-l6902dw.jpg'],
     description:
-      'Multifuncional corporativa de alta velocidade (até 52 ppm), alimentador duplex automático de 80 folhas e visor touchscreen colorido de 4,85 polegadas.',
+      'Multifuncional corporativa de alta velocidade (52 ppm), alimentador duplex de passagem única para 80 folhas e visor touchscreen colorido de 4,85 polegadas.',
     longDescription:
       'A Brother MFC-L6902DW é a multifuncional laser definitiva para empresas que demandam altíssimo volume mensal de impressão e digitalização com total confiabilidade. Com velocidade de impressão de até 52 páginas por minuto e alimentador automático de documentos (ADF) duplex de passagem única para 80 folhas, ela digitaliza frentes e versos simultaneamente em até 100 imagens por minuto. No modelo de Outsourcing de Impressão da Rotta Tecnologia, o equipamento conta com reposição automática de toners de ultra rendimento (até 20.000 páginas), peças e manutenção preventiva inclusas sem custo adicional.',
     features: [
@@ -216,11 +212,7 @@ export const productsData: ProductItem[] = [
     categoryLabel: 'Impressoras & Multifuncionais',
     brand: 'Brother',
     modelType: 'Locação & Venda',
-    images: [
-      'https://www.brother.com.br/-/media/brother/product-catalog-media/images/2022/08/26/12/54/multifuncional_laser_monocromatica_dcpl5652dn_00.png',
-      'https://conteudo.efacil.com.br/p/conteudos/conteudos_brother/multifuncional-dcp-l5652dn.jpg',
-      'https://support.brother.com/g/b/img/product/dcpl5652dn_us.jpg',
-    ],
+    images: ['/products/brother-dcp-l5652dn.jpg'],
     description:
       'Excelente equilíbrio entre custo e benefício corporativo, imprimindo até 42 ppm com duplex completo e segurança avançada de rede.',
     longDescription:
@@ -232,6 +224,7 @@ export const productsData: ProductItem[] = [
       'Visor Touchscreen colorido de 3,7"',
       'Interface de rede Ethernet e USB 2.0 de alta velocidade',
       'Bloqueio de funções e controle de cotas por usuário',
+      'Manutenção preventiva e cilindro original inclusos na locação',
     ],
     specs: [
       { label: 'Velocidade de Impressão', value: 'Até 42 ppm' },
@@ -251,11 +244,7 @@ export const productsData: ProductItem[] = [
     categoryLabel: 'Impressoras & Multifuncionais',
     brand: 'Brother',
     modelType: 'Locação & Venda',
-    images: [
-      'https://www.brother.com.br/-/media/brother/product-catalog-media/images/2020/10/20/02/53/mfcl8900cdw_front.png',
-      'https://assets.brother.com/transform/b687c246-bca7-4500-99f4-31735c1dc84a/10569_MFCL8900CDW_front-png',
-      'https://support.brother.com/g/b/img/product/mfcl8900cdw_us.jpg',
-    ],
+    images: ['/products/brother-mfc-l8900cdw.png'],
     description:
       'Impressão colorida vibrante e rápida de até 33 ppm com duplex total, Wi-Fi e alta capacidade para relatórios, projetos e apresentações.',
     longDescription:
@@ -279,17 +268,74 @@ export const productsData: ProductItem[] = [
     badge: 'Cores de Alta Fidelidade',
   },
   {
+    id: 'kyocera-ecosys-m3655idn',
+    name: 'Multifuncional Laser Monocromática Kyocera ECOSYS M3655idn',
+    category: 'impressoras',
+    categoryLabel: 'Impressoras & Multifuncionais',
+    brand: 'Kyocera',
+    modelType: 'Locação',
+    images: ['/products/kyocera-m3655idn.png'],
+    description:
+      'Potência industrial com velocidade de 55 ppm, componentes de longa durabilidade cerâmica e ciclo mensal de até 250.000 páginas.',
+    longDescription:
+      'A Kyocera ECOSYS M3655idn é o equipamento de trabalho pesado da frota da Rotta Tecnologia, projetado para ambientes corporativos que exigem altíssima robustez e produtividade contínua. Equipada com cilindro cerâmico de vida útil prolongada (até 500.000 páginas), scanner duplex de passagem única para 100 imagens por minuto e tela colorida sensível ao toque de 7 polegadas. Ideal para grandes departamentos, hospitais, escritórios de contabilidade e cooperativas.',
+    features: [
+      'Velocidade incomparável de até 55 páginas por minuto',
+      'Alimentador de documentos com passagem única (DSDP) para 100 folhas',
+      'Digitalização frente e verso de até 100 imagens por minuto',
+      'Tela de toque colorida inclinável de 7 polegadas customizável',
+      'Componentes cerâmicos de ultra durabilidade e menor custo por página',
+      'Integração total com bilhetagem e monitoramento proativo Rotta',
+    ],
+    specs: [
+      { label: 'Velocidade de Impressão', value: 'Até 55 ppm A4' },
+      { label: 'Resolução', value: '1200 x 1200 DPI' },
+      { label: 'Alimentador DSDP', value: '100 folhas com digitalização simultânea' },
+      { label: 'Capacidade de Papel', value: 'Bandeja padrão 500 folhas + 100 folhas multiuso' },
+      { label: 'Conectividade', value: 'Gigabit Ethernet 10/100/1000, USB 2.0' },
+      { label: 'Ciclo Mensal Máximo', value: 'Até 250.000 páginas/mês' },
+      { label: 'Disponibilidade', value: 'Locação (Outsourcing Rotta)' },
+    ],
+    badge: 'Alta Produção 55 ppm',
+  },
+  {
+    id: 'hp-laserjet-pro-m404n',
+    name: 'Impressora Laser Monocromática HP LaserJet Pro M404n',
+    category: 'impressoras',
+    categoryLabel: 'Impressoras & Multifuncionais',
+    brand: 'HP',
+    modelType: 'Locação & Venda',
+    images: ['/products/hp-m404n.png'],
+    description:
+      'Impressora corporativa compacta de alta performance, imprimindo até 40 ppm com saída da primeira página em apenas 6,3 segundos.',
+    longDescription:
+      'A HP LaserJet Pro M404n foi desenhada para manter equipes produtivas e focadas nos negócios. Com tecnologia de inicialização instantânea e segurança contra ameaças digitais, ela entrega textos nítidos com velocidade de até 40 ppm. No plano de locação da Rotta Tecnologia, toners HP originais de alto rendimento são entregues preventivamente antes do término.',
+    features: [
+      'Velocidade veloz de até 40 páginas por minuto (A4)',
+      'Primeira página pronta em apenas 6,3 segundos (modo pronto)',
+      'Design compacto que cabe perfeitamente em qualquer balcão ou estação',
+      'Segurança dinâmica HP com proteção de firmware',
+      'Bandeja principal para 250 folhas + bandeja multiuso de 100 folhas',
+      'Conexão de rede Gigabit Ethernet integrada',
+    ],
+    specs: [
+      { label: 'Velocidade de Impressão', value: 'Até 40 ppm' },
+      { label: 'Primeira Página', value: 'Em até 6,3 segundos' },
+      { label: 'Resolução', value: 'HP FastRes 1200, ProRes 1200 (1200 x 1200 DPI)' },
+      { label: 'Ciclo Mensal Recomendado', value: '750 a 4.000 páginas (máx 80.000)' },
+      { label: 'Conectividade', value: 'Gigabit Ethernet 10/100/1000, USB 2.0' },
+      { label: 'Disponibilidade', value: 'Locação & Venda' },
+    ],
+    badge: 'Compacta & Rápida',
+  },
+  {
     id: 'epson-ecotank-l3250',
     name: 'Impressora Multifuncional Tanque de Tinta Epson EcoTank L3250',
     category: 'impressoras',
     categoryLabel: 'Impressoras & Multifuncionais',
     brand: 'Epson',
     modelType: 'Venda & Locação',
-    images: [
-      'https://novo.rottatecnologia.com.br/wp-content/uploads/2024/06/p_54685_alta_1.png',
-      'https://images.tcdn.com.br/img/img_prod/1047120/impressora_multifuncional_epson_ecotank_l3250_tanque_de_tinta_colorida_wi_fi_bivolt_c11cj67301_3321_1_45d4a13f707f154db3cfb1bd3dbf15f9.png',
-      'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=1000&q=85',
-    ],
+    images: ['/products/epson-ecotank-l3250.png', '/products/epson-ecotank-l3250.jpg'],
     description:
       'Sistema de tanque de tinta 100% sem cartuchos com Wi-Fi Direct e custo por página extremamente reduzido.',
     longDescription:
@@ -308,7 +354,7 @@ export const productsData: ProductItem[] = [
       { label: 'Conectividade', value: 'Wi-Fi, Wi-Fi Direct, USB' },
       { label: 'Disponibilidade', value: 'Venda e Locação' },
     ],
-    badge: 'Econômica',
+    badge: 'Tanque Econômico',
   },
 
   // ==========================================
@@ -321,10 +367,7 @@ export const productsData: ProductItem[] = [
     categoryLabel: 'Scanners Corporativos',
     brand: 'Brother',
     modelType: 'Locação & Venda',
-    images: [
-      'https://support.brother.com/g/b/img/product/ads4700w_us.jpg',
-      'https://assets.brother.com/transform/4181a1ae-8b13-46a1-90b2-72a616c7da98/17522_ADS4700W-Spinner-1-846x846-jpg',
-    ],
+    images: ['/products/brother-ads-4700w.jpg'],
     description:
       'Digitalização veloz de até 40 ppm / 80 ipm, alimentador para 80 folhas, tela touchscreen de 4,3" e Wi-Fi para integração direta a nuvens e pastas de rede.',
     longDescription:
@@ -347,40 +390,7 @@ export const productsData: ProductItem[] = [
       { label: 'Formatos Suportados', value: 'PDF pesquisável, PDF/A, TIFF, JPEG' },
       { label: 'Disponibilidade', value: 'Locação & Venda' },
     ],
-    badge: 'Lançamento',
-  },
-  {
-    id: 'brother-ads-4900w',
-    name: 'Scanner Departamental de Alta Produção Brother ADS-4900W',
-    category: 'scanners',
-    categoryLabel: 'Scanners Corporativos',
-    brand: 'Brother',
-    modelType: 'Locação & Venda',
-    images: [
-      'https://support.brother.com/g/b/img/product/ads4900w_us.jpg',
-      'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=1000&q=80',
-    ],
-    description:
-      'Solução para grandes volumes com velocidade impressionante de até 60 ppm / 120 ipm, alimentador para 100 folhas e ciclo diário de 9.000 páginas.',
-    longDescription:
-      'O Brother ADS-4900W é o scanner topo de linha da Brother para empresas e birôs de digitalização que necessitam de máxima produtividade diária. Com velocidade de até 60 páginas por minuto (120 imagens por minuto duplex) e capacidade para 100 folhas no alimentador, processa documentos de espessuras variadas, cartões de identificação e formulários contínuos com absoluta precisão.',
-    features: [
-      'Velocidade imbatível de 60 ppm / 120 ipm duplex',
-      'Alimentador automático para 100 folhas',
-      'Ciclo diário massivo de até 9.000 páginas',
-      'Tela sensível ao toque colorida de 4,3 polegadas',
-      'Separação avançada com roletes de alta durabilidade',
-      'Suporte a driver TWAIN, ISIS, WIA e SANE',
-    ],
-    specs: [
-      { label: 'Velocidade', value: 'Até 60 ppm / 120 ipm' },
-      { label: 'Capacidade do ADF', value: '100 folhas' },
-      { label: 'Ciclo Diário', value: 'Até 9.000 páginas' },
-      { label: 'Conectividade', value: 'Gigabit Ethernet, Wi-Fi 5GHz, USB 3.0' },
-      { label: 'Resolução', value: 'Até 600 x 600 DPI óptica' },
-      { label: 'Disponibilidade', value: 'Locação & Venda' },
-    ],
-    badge: 'Alta Performance',
+    badge: 'Mesa 40 ppm',
   },
   {
     id: 'brother-ads-1200',
@@ -389,14 +399,11 @@ export const productsData: ProductItem[] = [
     categoryLabel: 'Scanners Corporativos',
     brand: 'Brother',
     modelType: 'Venda & Locação',
-    images: [
-      'https://support.brother.com/g/b/img/product/ads1200_us.jpg',
-      'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=1000&q=80',
-    ],
+    images: ['/products/brother-ads-1200.jpg'],
     description:
-      'Scanner portátil e veloz de até 25 ppm, alimentado via USB-C ou tomada, perfeito para balcões de atendimento, recepção e profissionais em trânsito.',
+      'Scanner portátil e veloz de até 25 ppm, alimentado via USB ou tomada, perfeito para balcões de atendimento, recepção e profissionais em trânsito.',
     longDescription:
-      'Compacto o suficiente para caber em uma mochila ou na gaveta do balcão, o Brother ADS-1200 digitaliza documentos e cartões plásticos de identidade com velocidade de até 25 páginas por minuto. Pode ser alimentado diretamente pela porta USB 3.0 de um notebook.',
+      'Compacto o suficiente para caber em uma mochila ou na gaveta do balcão, o Brother ADS-1200 digitaliza documentos e cartões plásticos de identidade com velocidade de até 25 páginas por minuto. Pode ser alimentado diretamente pela porta USB 3.0 de um notebook ou ligado à tomada.',
     features: [
       'Design ultra compacto e retrátil',
       'Velocidade de 25 ppm / 50 ipm duplex',
@@ -411,12 +418,69 @@ export const productsData: ProductItem[] = [
       { label: 'Peso', value: 'Apenas 1,36 kg' },
       { label: 'Disponibilidade', value: 'Venda & Locação' },
     ],
-    badge: 'Portátil',
+    badge: 'Portátil USB',
   },
 
   // ==========================================
-  // IMPRESSORAS DE ETIQUETAS (Brother & Zebra)
+  // IMPRESSORAS DE ETIQUETAS (Zebra / Elgin / Brother)
   // ==========================================
+  {
+    id: 'zebra-zd220-termica',
+    name: 'Impressora Térmica de Etiquetas Zebra ZD220',
+    category: 'etiquetas',
+    categoryLabel: 'Impressoras de Etiquetas',
+    brand: 'Zebra',
+    modelType: 'Locação & Venda',
+    images: ['/products/zebra-zd220.jpg'],
+    description:
+      'Robusta, padrão da indústria logística e de gôndolas de supermercado com tecnologia de termotransferência e térmica direta.',
+    longDescription:
+      'A Zebra ZD220 foi construída para operar anos sem interrupções. Com linguagens ZPL e EPL nativas, é o equipamento homologado por transportadoras como Correios, Mercado Livre, Jadlog e sistemas ERP industriais. Disponível em Outsourcing de Impressão na Rotta com ribbons e cabeças inclusas.',
+    features: [
+      'Construção de parede dupla para durabilidade extra',
+      'Compatível com ribbons de até 74 metros',
+      'Linguagens nativas ZPL II e EPL 2',
+      'Largura de impressão de até 104 mm (4 polegadas)',
+      'Troca rápida e intuitiva de suprimentos',
+    ],
+    specs: [
+      { label: 'Resolução', value: '203 DPI' },
+      { label: 'Velocidade', value: 'Até 102 mm/s' },
+      { label: 'Largura Máxima', value: '104 mm' },
+      { label: 'Conexão', value: 'USB 2.0' },
+      { label: 'Disponibilidade', value: 'Locação & Venda' },
+    ],
+    badge: 'Padrão Logístico',
+  },
+  {
+    id: 'elgin-l42pro-termica',
+    name: 'Impressora Térmica de Etiquetas Elgin L42 Pro',
+    category: 'etiquetas',
+    categoryLabel: 'Impressoras de Etiquetas',
+    brand: 'Elgin',
+    modelType: 'Locação & Venda',
+    images: ['/products/elgin-l42pro.jpg'],
+    description:
+      'Impressora nacional de alta compatibilidade para etiquetas adesivas, suporta rolos de ribbon de até 300 metros e comunicação USB/Serial.',
+    longDescription:
+      'A Elgin L42 Pro é amplamente consagrada no comércio e na indústria pela robustez e baixo custo de manutenção. Com capacidade para ribbons de 300 metros (quatro vezes mais que modelos de entrada), ela reduz paradas na operação. Acompanha software de criação Bartender Ultralite para desenhar códigos de barras, tabelas nutricionais e etiquetas de gôndola.',
+    features: [
+      'Suporta ribbons de grande capacidade de até 300 metros',
+      'Software Bartender Ultralite incluso para edição de etiquetas',
+      'Emulações EPL e ZPL com detecção automática',
+      'Sensor móvel para leitura de GAP, tarja preta e etiquetas contínuas',
+      'Carcaça reforçada de fácil higienização',
+    ],
+    specs: [
+      { label: 'Resolução', value: '203 DPI' },
+      { label: 'Velocidade', value: 'Até 102 mm/s (4 pol/s)' },
+      { label: 'Largura Máxima de Impressão', value: '108 mm' },
+      { label: 'Comprimento do Ribbon', value: 'Até 300 metros' },
+      { label: 'Conexão', value: 'USB 2.0 e Serial RS-232' },
+      { label: 'Disponibilidade', value: 'Locação & Venda' },
+    ],
+    badge: 'Ribbon 300m',
+  },
   {
     id: 'brother-ql-800',
     name: 'Impressora Térmica de Etiquetas Brother QL-800',
@@ -424,10 +488,7 @@ export const productsData: ProductItem[] = [
     categoryLabel: 'Impressoras de Etiquetas',
     brand: 'Brother',
     modelType: 'Venda & Locação',
-    images: [
-      'https://support.brother.com/g/b/img/product/ql800_us.jpg',
-      'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1000&q=80',
-    ],
+    images: ['/products/brother-ql-800.jpg'],
     description:
       'Impressão térmica rápida de até 93 etiquetas por minuto com capacidade exclusiva de imprimir em preto e vermelho sem uso de tinta.',
     longDescription:
@@ -456,10 +517,7 @@ export const productsData: ProductItem[] = [
     categoryLabel: 'Impressoras de Etiquetas',
     brand: 'Brother',
     modelType: 'Venda & Locação',
-    images: [
-      'https://support.brother.com/g/b/img/product/ql820nwb_us.jpg',
-      'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1000&q=80',
-    ],
+    images: ['/products/brother-ql-800.jpg'],
     description:
       'Conectividade total com Bluetooth, Wi-Fi, Ethernet e visor LCD retroiluminado para operação autônoma sem computador.',
     longDescription:
@@ -480,40 +538,9 @@ export const productsData: ProductItem[] = [
     ],
     badge: 'Bluetooth & Wi-Fi',
   },
-  {
-    id: 'zebra-zd220-termica',
-    name: 'Impressora Térmica de Etiquetas Zebra ZD220',
-    category: 'etiquetas',
-    categoryLabel: 'Impressoras de Etiquetas',
-    brand: 'Zebra',
-    modelType: 'Locação & Venda',
-    images: [
-      '/zebra-printer.jpg',
-      'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1000&q=80',
-    ],
-    description:
-      'Robusta, padrão da indústria logística e de gôndolas de supermercado com tecnologia de termotransferência e térmica direta.',
-    longDescription:
-      'A Zebra ZD220 foi construída para operar anos sem interrupções. Com linguagens ZPL e EPL nativas, é o equipamento homologado por transportadoras como Correios, Mercado Livre, Jadlog e sistemas ERP industriais. Disponível em Outsourcing de Impressão na Rotta com ribbons e cabeças inclusas.',
-    features: [
-      'Construção de parede dupla para durabilidade extra',
-      'Compatível com ribbons de até 74 metros',
-      'Linguagens nativas ZPL II e EPL 2',
-      'Largura de impressão de até 104 mm (4 polegadas)',
-      'Troca rápida e intuitiva de suprimentos',
-    ],
-    specs: [
-      { label: 'Resolução', value: '203 DPI' },
-      { label: 'Velocidade', value: 'Até 102 mm/s' },
-      { label: 'Largura Máxima', value: '104 mm' },
-      { label: 'Conexão', value: 'USB 2.0' },
-      { label: 'Disponibilidade', value: 'Locação & Venda' },
-    ],
-    badge: 'Padrão Logístico',
-  },
 
   // ==========================================
-  // ROTULADORES ELETRÔNICOS (P-Touch Brother)
+  // ROTULADORES ELETRÔNICOS (Brother P-Touch)
   // ==========================================
   {
     id: 'brother-pt-h110',
@@ -522,10 +549,7 @@ export const productsData: ProductItem[] = [
     categoryLabel: 'Rotuladores Eletrônicos',
     brand: 'Brother',
     modelType: 'Venda',
-    images: [
-      'https://support.brother.com/g/b/img/product/pth110_us.jpg',
-      'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1000&q=80',
-    ],
+    images: ['/products/brother-pt-h110.jpg'],
     description:
       'Rotulador portátil ergonômico com teclado QWERTY, teclas de atalho direto para fontes e molduras, e suporte a fitas laminadas TZe de alta durabilidade.',
     longDescription:
@@ -554,10 +578,7 @@ export const productsData: ProductItem[] = [
     categoryLabel: 'Rotuladores Eletrônicos',
     brand: 'Brother',
     modelType: 'Venda',
-    images: [
-      'https://support.brother.com/g/b/img/product/ptd210_us.jpg',
-      'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1000&q=80',
-    ],
+    images: ['/products/brother-pt-h110.jpg'],
     description:
       'Rotulador de mesa com teclas de formatação em um toque, 14 fontes, 97 molduras e armazenamento de até 30 etiquetas na memória interna.',
     longDescription:
@@ -576,38 +597,7 @@ export const productsData: ProductItem[] = [
       { label: 'Resolução', value: '180 DPI' },
       { label: 'Disponibilidade', value: 'Venda' },
     ],
-    badge: 'Mesa & Escritório',
-  },
-  {
-    id: 'brother-pt-e550wvp',
-    name: 'Rotulador Industrial Brother P-Touch PT-E550WVP',
-    category: 'rotuladores',
-    categoryLabel: 'Rotuladores Eletrônicos',
-    brand: 'Brother',
-    modelType: 'Venda & Locação',
-    images: [
-      'https://support.brother.com/g/b/img/product/pte550w_us.jpg',
-      'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1000&q=80',
-    ],
-    description:
-      'Rotulador industrial reforçado para técnicos de TI, telecom e eletricistas com Wi-Fi, corte automático e maleta de transporte inclusa.',
-    longDescription:
-      'O PT-E550WVP é a ferramenta profissional de quem trabalha com infraestrutura de redes e elétrica. Ele gera etiquetas de bandeira para cabos, identificação de patch panels, blocos de conexão e códigos de barras. Comunica-se sem fio com smartphones via aplicativo Brother Cable Label Tool.',
-    features: [
-      'Conexão Wi-Fi para impressão direta de apps mobile e PC',
-      'Cortador automático duplo (corte total e meio-corte)',
-      'Botões de atalho dedicados para cabos, painéis e blocos',
-      'Suporte a tubos termoretráteis HSe e fitas até 24 mm',
-      'Acompanha maleta rígida, bateria de lítio e fonte',
-    ],
-    specs: [
-      { label: 'Larguras de Fita', value: 'De 3.5 mm até 24 mm' },
-      { label: 'Fitas Especiais', value: 'TZe, HSe (termoretrátil), HGe' },
-      { label: 'Conexão', value: 'Wi-Fi, USB' },
-      { label: 'Cortador', value: 'Automático com função meio-corte' },
-      { label: 'Disponibilidade', value: 'Venda & Locação' },
-    ],
-    badge: 'Industrial / Redes',
+    badge: 'Mesa & Arquivo',
   },
 
   // ==========================================
@@ -620,10 +610,7 @@ export const productsData: ProductItem[] = [
     categoryLabel: 'ScanNCut (Máquinas de Corte)',
     brand: 'Brother',
     modelType: 'Venda',
-    images: [
-      'https://support.brother.com/g/b/img/product/sdx125_us.jpg',
-      'https://images.unsplash.com/photo-1589739900243-4b52cd9b104e?auto=format&fit=crop&w=1000&q=80',
-    ],
+    images: ['/products/brother-scanncut.jpg'],
     description:
       'Máquina de corte e scanner embutido de 600 DPI com tecnologia de lâmina totalmente automática que corta materiais de até 3 mm de espessura.',
     longDescription:
@@ -647,40 +634,70 @@ export const productsData: ProductItem[] = [
     ],
     badge: 'Scanner 600 DPI',
   },
+
+  // ==========================================
+  // AUTOMAÇÃO COMERCIAL (Elgin / Honeywell)
+  // ==========================================
   {
-    id: 'brother-scanncut-sdx225',
-    name: 'Máquina de Corte Profissional Brother ScanNCut SDX225',
-    category: 'scanncut',
-    categoryLabel: 'ScanNCut (Máquinas de Corte)',
-    brand: 'Brother',
-    modelType: 'Venda',
-    images: [
-      'https://support.brother.com/g/b/img/product/sdx225_us.jpg',
-      'https://images.unsplash.com/photo-1589739900243-4b52cd9b104e?auto=format&fit=crop&w=1000&q=80',
-    ],
+    id: 'elgin-i9-cupom',
+    name: 'Impressora Térmica de Cupom Não Fiscal Elgin i9 Full',
+    category: 'automacao',
+    categoryLabel: 'Automação Comercial',
+    brand: 'Elgin',
+    modelType: 'Venda & Locação',
+    images: ['/products/elgin-i9.jpg'],
     description:
-      'A versão topo de linha para produção contínua com 1.303 desenhos na memória, suporte a rolo de vinil e compatibilidade direta com arquivos PES/PHC de bordado.',
+      'Velocidade imbatível de 300 mm/s, conexões USB, Ethernet e Serial integradas e guilhotina de 2 milhões de cortes para NFC-e e SAT.',
     longDescription:
-      'Projetada para ateliês profissionais e pequenos negócios gráficos, a SDX225 vem equipada com o maior pacote de acessórios, compatibilidade direta para ler arquivos de bordado e capacidade de corte contínuo com alimentador de rolos opcional para até 1,80m.',
+      'A Elgin i9 Full é a impressora de cupons fiscais e comprovantes mais rápida e robusta do varejo brasileiro. Com velocidade impressionante de até 300 mm por segundo e interfaces de comunicação completas (USB, Rede Ethernet e Serial RS-232 já integradas no mesmo aparelho), evita filas no caixa e integra-se perfeitamente com todos os sistemas ERP, de frente de caixa e de comandas de restaurantes.',
     features: [
-      '1.303 desenhos e 17 fontes embutidos de fábrica',
-      'Lê arquivos de máquinas de bordado (PES, PHC, PHX)',
-      'Scanner embutido de 600 DPI com digitalização para USB',
-      'Lâmina automática de tecido fino inclusa',
-      'Corte de precisão milimétrica em feltro, couro sintético e vinil',
+      'Velocidade ultrarrápida de até 300 mm por segundo',
+      'Comunicação tripla integrada: USB, Ethernet de rede e Serial RS-232',
+      'Guilhotina automática reforçada para mais de 2 milhões de cortes',
+      'Compatibilidade total com NFC-e, SAT Fiscal e MFE',
+      'Conexão RJ-11 para abertura automática de gaveta de dinheiro',
+      'Garantia oficial Elgin com suporte qualificado Rotta Tecnologia',
     ],
     specs: [
-      { label: 'Espessura de Corte', value: 'Até 3 mm' },
-      { label: 'Desenhos na Memória', value: '1.303 desenhos' },
-      { label: 'Formatos Compatíveis', value: 'SVG, PES, PHC, PHX, FCM' },
-      { label: 'Display', value: 'Touchscreen colorido de 5"' },
-      { label: 'Disponibilidade', value: 'Venda com Treinamento' },
+      { label: 'Velocidade de Impressão', value: 'Até 300 mm/s' },
+      { label: 'Largura do Papel', value: 'Bobina de 80 mm ou 57,5 mm' },
+      { label: 'Conectividade', value: 'USB 2.0, Ethernet RJ-45 e Serial RS-232' },
+      { label: 'Guilhotina', value: 'Automática inclusa (2.000.000 de cortes)' },
+      { label: 'Porta Gaveteiro', value: 'Conexão RJ-11' },
+      { label: 'Disponibilidade', value: 'Venda & Locação' },
     ],
-    badge: 'Edição Profissional',
+    badge: 'Padrão Varejo 300mm/s',
+  },
+  {
+    id: 'leitor-honeywell-voyager-2d',
+    name: 'Leitor de Código de Barras e QR Code 2D Honeywell',
+    category: 'automacao',
+    categoryLabel: 'Automação Comercial',
+    brand: 'Honeywell',
+    modelType: 'Venda & Locação',
+    images: ['/products/honeywell-voyager-2d.jpg'],
+    description:
+      'Leitura instantânea de códigos 1D, 2D, QR Code em telas de celular e boletos bancários com sensor CMOS de alta precisão.',
+    longDescription:
+      'O Leitor Honeywell é o equipamento homologado pelas maiores redes de varejo para agilizar a frente de caixa. Lê códigos danificados ou rasurados no primeiro disparo e é totalmente compatível com emissão de SAT/NFC-e e boletos bancários.',
+    features: [
+      'Leitura veloz de QR Code, boletos FEBRABAN e códigos 1D/2D',
+      'Lê diretamente de telas de smartphones e embalagens curvas',
+      'Conexão USB Plug and Play sem necessidade de drivers',
+      'Carcaça reforçada resistente a quedas de até 1,5 m no concreto',
+    ],
+    specs: [
+      { label: 'Tecnologia', value: 'Área Imager CMOS 2D' },
+      { label: 'Conexão', value: 'USB HID / Serial' },
+      { label: 'Resistência', value: 'Quedas de 1,5 metro' },
+      { label: 'Garantia', value: '12 meses' },
+      { label: 'Disponibilidade', value: 'Venda & Locação' },
+    ],
+    badge: 'PDV Ágil',
   },
 
   // ==========================================
-  // PERIFÉRICOS & AUTOMAÇÃO COMERCIAL (Dell / Honeywell / Elgin)
+  // PERIFÉRICOS & INFRAESTRUTURA DE TI (Dell / Rotta TI)
   // ==========================================
   {
     id: 'dell-km3322w',
@@ -689,11 +706,7 @@ export const productsData: ProductItem[] = [
     categoryLabel: 'Periféricos & Acessórios',
     brand: 'Dell',
     modelType: 'Venda',
-    images: [
-      'https://novo.rottatecnologia.com.br/wp-content/uploads/2024/06/teclado.jpg',
-      'https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-client-peripherals/keyboards/dell/km3322w/km3322w-kbu-01-bk.psd?fmt=png-alpha&pscan=auto&scl=1&hei=402&wid=602&qlt=100,0&resMode=sharp2&size=602,402',
-      'https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-client-peripherals/keyboards/dell/km3322w/km3322w-kbu-ms-02-bk.psd?fmt=png-alpha&pscan=auto&scl=1&hei=402&wid=602&qlt=100,0&resMode=sharp2&size=602,402',
-    ],
+    images: ['/products/dell-km3322w.jpg'],
     description:
       'Combo sem fio durável com bateria de até 36 meses para o teclado e 18 meses para o mouse, teclas silenciosas e resistente a respingos.',
     longDescription:
@@ -718,105 +731,13 @@ export const productsData: ProductItem[] = [
     badge: 'Bateria 36 Meses',
   },
   {
-    id: 'dell-km5221w-pro',
-    name: 'Kit Teclado e Mouse sem Fio Dell Pro KM5221W',
-    category: 'perifericos',
-    categoryLabel: 'Periféricos & Acessórios',
-    brand: 'Dell',
-    modelType: 'Venda',
-    images: [
-      'https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=1000&q=85',
-      'https://novo.rottatecnologia.com.br/wp-content/uploads/2024/06/teclado.jpg',
-    ],
-    description:
-      'Combo premium com mouse ajustável até 4000 DPI via Dell Peripheral Manager, teclas de perfil baixo ultra silenciosas e acabamento refinado.',
-    longDescription:
-      'Para executivos e colaboradores que buscam produtividade e conforto ergonômico superior. Teclas de perfil baixo com curso macio, botões de atalho programáveis e mouse de alta sensibilidade ajustável para monitores 4K.',
-    features: [
-      'Mouse com resolução ajustável de até 4000 DPI',
-      'Teclas de perfil baixo com amortecimento ultra silencioso',
-      'Personalização de atalhos pelo software Dell Peripheral Manager',
-      'Bateria com duração de até 36 meses',
-      'Padrão ABNT2 em preto fosco premium',
-    ],
-    specs: [
-      { label: 'Conectividade', value: 'Sem Fio 2.4 GHz' },
-      { label: 'DPI do Mouse', value: 'Ajustável: 1000, 1600, 2400, 4000 DPI' },
-      { label: 'Atalhos', value: '12 teclas multimídia programáveis' },
-      { label: 'Disponibilidade', value: 'Venda' },
-    ],
-    badge: 'Linha Pro',
-  },
-  {
-    id: 'leitor-honeywell-voyager-2d',
-    name: 'Leitor de Código de Barras e QR Code 2D Honeywell',
-    category: 'automacao',
-    categoryLabel: 'Automação Comercial',
-    brand: 'Honeywell',
-    modelType: 'Venda & Locação',
-    images: [
-      'https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&w=1000&q=85',
-    ],
-    description:
-      'Leitura instantânea de códigos 1D, 2D, QR Code em telas de celular e boletos bancários com sensor CMOS de alta precisão.',
-    longDescription:
-      'O Leitor Honeywell é o equipamento homologado pelas maiores redes de varejo para agilizar a frente de caixa. Lê códigos danificados ou rasurados no primeiro disparo e é totalmente compatível com emissão de SAT/NFC-e e boletos bancários.',
-    features: [
-      'Leitura veloz de QR Code, boletos FEBRABAN e códigos 1D/2D',
-      'Lê diretamente de telas de smartphones e embalagens curvas',
-      'Conexão USB Plug and Play sem necessidade de drivers',
-      'Carcaça reforçada resistente a quedas de até 1,5 m no concreto',
-    ],
-    specs: [
-      { label: 'Tecnologia', value: 'Área Imager CMOS 2D' },
-      { label: 'Conexão', value: 'USB HID / Serial' },
-      { label: 'Resistência', value: 'Quedas de 1,5 metro' },
-      { label: 'Garantia', value: '12 meses' },
-      { label: 'Disponibilidade', value: 'Venda & Locação' },
-    ],
-    badge: 'PDV Ágil',
-  },
-  {
-    id: 'elgin-i9-cupom',
-    name: 'Impressora Térmica de Cupons Elgin i9',
-    category: 'automacao',
-    categoryLabel: 'Automação Comercial',
-    brand: 'Elgin',
-    modelType: 'Venda & Locação',
-    images: [
-      'https://images.unsplash.com/photo-1556742111-a301076d9d18?auto=format&fit=crop&w=1000&q=85',
-    ],
-    description:
-      'Velocidade de até 300 mm/s, guilhotina de 2 milhões de cortes e compatibilidade total com NFC-e, SAT e comandas de restaurantes.',
-    longDescription:
-      'A Elgin i9 é a impressora de cupons fiscais e recibos mais vendida do Brasil. Robusta, rápida e com guilhotina automática, evita filas no caixa e integra-se nativamente a todos os ERPs de varejo e food service.',
-    features: [
-      'Velocidade imbatível de 300 mm por segundo',
-      'Guilhotina com durabilidade para 2 milhões de cortes',
-      'Portas USB e Ethernet de rede para comandas na cozinha',
-      'Saída para acionamento automático de gaveta de dinheiro',
-    ],
-    specs: [
-      { label: 'Velocidade', value: 'Até 300 mm/s' },
-      { label: 'Largura do Papel', value: '80 mm' },
-      { label: 'Guilhotina', value: 'Automática inclusa' },
-      { label: 'Conectividade', value: 'USB + Ethernet' },
-      { label: 'Disponibilidade', value: 'Venda & Locação' },
-    ],
-    badge: 'Padrão Varejo',
-  },
-  {
     id: 'redes-organizacao-corporativa',
     name: 'Organização de Cabos e Redes Empresariais (Infraestrutura)',
     category: 'perifericos',
     categoryLabel: 'Periféricos & Acessórios',
     brand: 'Rotta TI',
     modelType: 'Venda',
-    images: [
-      'https://novo.rottatecnologia.com.br/wp-content/uploads/2024/10/rack-servidor-data-center-1-min.jpg',
-      'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1000&q=85',
-      'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=1000&q=85',
-    ],
+    images: ['/products/rack-servidor.jpg', '/products/rack-servidor-cat6.jpg'],
     description:
       'Montagem de racks, certificação de cabeamento estruturado Cat6, switches gerenciáveis e organização completa da infraestrutura da empresa.',
     longDescription:

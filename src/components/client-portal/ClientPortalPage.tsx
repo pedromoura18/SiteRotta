@@ -370,6 +370,10 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
             supplies={supplies}
             counters={counters}
             invoices={invoices}
+            onUpdateEquipments={(newEqs) => {
+              setEquipments(newEqs)
+              saveClientEquipments(newEqs)
+            }}
             onImpersonateCompany={(comp) => {
               const s: PortalSession = { role: 'client', company: comp, adminName: 'Douglas Rotta' }
               setSession(s)

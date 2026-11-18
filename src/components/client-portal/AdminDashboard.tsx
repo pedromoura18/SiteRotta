@@ -31,6 +31,7 @@ import type {
   SupplyOrderStatus,
 } from '../../types/clientPortal'
 import { getEquipmentImage } from '../../data/mockClientData'
+import { executeTelemetrySync } from '../../utils/maquinaProSync'
 
 interface AdminDashboardProps {
   companies: ClientCompany[]
@@ -43,6 +44,7 @@ interface AdminDashboardProps {
   onUpdateTicketStatus: (ticketId: string, newStatus: TicketStatus, techNote?: string) => void
   onUpdateSupplyStatus: (orderId: string, newStatus: SupplyOrderStatus, trackingCode?: string) => void
   onShowToast: (msg: string) => void
+  onUpdateEquipments?: (newEqs: ClientEquipment[]) => void
 }
 
 export function AdminDashboard({
@@ -56,6 +58,7 @@ export function AdminDashboard({
   onUpdateTicketStatus,
   onUpdateSupplyStatus,
   onShowToast,
+  onUpdateEquipments,
 }: AdminDashboardProps) {
   const [adminTab, setAdminTab] = useState<
     'visao-geral' | 'maquinapro' | 'chamados' | 'suprimentos' | 'equipamentos' | 'telemetria'
@@ -63,7 +66,7 @@ export function AdminDashboard({
 
   // Estados da Integração Máquina Pro (app.maquinapro.app.br)
   const [isSyncingMaquinaPro, setIsSyncingMaquinaPro] = useState(false)
-  const [lastSyncTime, setLastSyncTime] = useState('há 2 min')
+  const [lastSyncTime, setLastSyncTime] = useState('Hoje às 13:30')
   const [copiedWebhook, setCopiedWebhook] = useState(false)
   const [copiedToken, setCopiedToken] = useState(false)
   const [maquinaProView, setMaquinaProView] = useState<'monitor' | 'embed' | 'guia'>('monitor')
@@ -72,15 +75,18 @@ export function AdminDashboard({
   const [ticketCompanyFilter, setTicketCompanyFilter] = useState('todos')
   const [ticketStatusFilter, setTicketStatusFilter] = useState('todos')
 
-  // Sincronização em Tempo Real com Máquina Pro
+  // Sincronização em Tempo Real com Máquina Pro (Leituras SNMP)
   const handleSyncMaquinaPro = () => {
     setIsSyncingMaquinaPro(true)
     setTimeout(() => {
+      const syncRes = executeTelemetrySync(equipments)
+      if (onUpdateEquipments) {
+        onUpdateEquipments(syncRes.updatedEquipments)
+      }
+      setLastSyncTime(syncRes.timestamp)
       setIsSyncingMaquinaPro(false)
-      const now = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-      setLastSyncTime(`às ${now}`)
-      onShowToast('📡 Telemetria Máquina Pro sincronizada! Contadores e níveis de toner atualizados via SNMP.')
-    }, 1200)
+      onShowToast(`📡 ${syncRes.syncedCount} impressoras sincronizadas em tempo real com app.maquinapro.app.br via SNMP!`)
+    }, 900)
   }
 
   const handleCopyWebhook = () => {
