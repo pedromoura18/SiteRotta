@@ -9,7 +9,6 @@ import {
   Clock,
   Phone,
   MessageCircle,
-  TrendingUp,
   ShieldCheck,
   Building,
 } from 'lucide-react'
@@ -30,7 +29,7 @@ interface ClientDashboardProps {
   invoices: ClientInvoice[]
   onOpenNewTicket: () => void
   onOpenNewSupply: () => void
-  onNavigateTab: (tab: 'chamados' | 'equipamentos' | 'suprimentos' | 'contadores' | 'financeiro') => void
+  onNavigateTab: (tab: 'chamados' | 'equipamentos' | 'suprimentos' | 'financeiro') => void
   onSelectTicket: (ticket: ClientTicket) => void
 }
 
@@ -259,14 +258,14 @@ export function ClientDashboard({
 
           <button
             type="button"
-            onClick={() => onNavigateTab('contadores')}
-            className="flex flex-col items-center justify-center text-center p-4 rounded-2xl bg-slate-50 hover:bg-amber-50/70 border border-slate-200/80 hover:border-amber-500 transition-all group"
+            onClick={() => onNavigateTab('equipamentos')}
+            className="flex flex-col items-center justify-center text-center p-4 rounded-2xl bg-slate-50 hover:bg-blue-50/70 border border-slate-200/80 hover:border-rotta-blue transition-all group"
           >
-            <div className="rounded-xl bg-amber-100/70 text-amber-600 p-2.5 mb-2 group-hover:scale-110 transition-transform">
-              <TrendingUp size={20} />
+            <div className="rounded-xl bg-blue-100/70 text-rotta-blue p-2.5 mb-2 group-hover:scale-110 transition-transform">
+              <Printer size={20} />
             </div>
-            <span className="text-xs font-bold text-slate-800">Lançar Contador</span>
-            <span className="text-[10px] text-slate-400 mt-0.5">Bilhetagem mensal</span>
+            <span className="text-xs font-bold text-slate-800">Meus Equipamentos</span>
+            <span className="text-[10px] text-slate-400 mt-0.5">Telemetria & Toners</span>
           </button>
 
           <button

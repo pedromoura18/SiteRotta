@@ -245,6 +245,52 @@ export interface RegisteredUser {
 // Sal constante para ambiente de demonstração
 const GLOBAL_SALT = 'rotta_salt_secure_prod_2026'
 
+const DYNAMIC_USERS_STORAGE_KEY = 'rotta_registered_users_v2'
+
+export function getRegisteredUsers(): RegisteredUser[] {
+  try {
+    const raw = localStorage.getItem(DYNAMIC_USERS_STORAGE_KEY)
+    if (raw) {
+      const dynamicList: RegisteredUser[] = JSON.parse(raw)
+      const dynamicIds = new Set(dynamicList.map((u) => u.id))
+      return [...REGISTERED_ACCOUNTS.filter((u) => !dynamicIds.has(u.id)), ...dynamicList]
+    }
+  } catch (e) {
+    console.warn('Erro ao ler usuários registrados:', e)
+  }
+  return REGISTERED_ACCOUNTS
+}
+
+export async function saveNewRegisteredUser(userData: {
+  identifier: string
+  name: string
+  companyId: string
+  rawPassword: string
+}): Promise<RegisteredUser> {
+  const salt = GLOBAL_SALT
+  const passwordHash = await hashPasswordWithSalt(userData.rawPassword, salt)
+  const newUser: RegisteredUser = {
+    id: `user-${Date.now()}`,
+    identifier: userData.identifier.trim().toLowerCase(),
+    name: userData.name,
+    role: 'client',
+    companyId: userData.companyId,
+    salt,
+    passwordHash,
+  }
+
+  try {
+    const raw = localStorage.getItem(DYNAMIC_USERS_STORAGE_KEY)
+    const list: RegisteredUser[] = raw ? JSON.parse(raw) : []
+    const updated = [...list.filter((u) => u.identifier !== newUser.identifier), newUser]
+    localStorage.setItem(DYNAMIC_USERS_STORAGE_KEY, JSON.stringify(updated))
+  } catch (e) {
+    console.warn('Erro ao salvar novo usuário registrado:', e)
+  }
+
+  return newUser
+}
+
 // Senhas padrão homologadas:
 // Douglas Rotta: "rotta2026" ou "Rotta@Master2026", PIN "7656"
 // Alpha: "alpha123" ou "123456"
@@ -319,8 +365,10 @@ export async function authenticateWithSecurity(
     }
   }
 
+  const allUsers = getRegisteredUsers()
+
   // Busca conta cadastrada correspondente
-  let matchedUser = REGISTERED_ACCOUNTS.find((u) => {
+  let matchedUser = allUsers.find((u) => {
     if (u.role !== targetRole) return false
     const uClean = u.identifier.toLowerCase()
     return uClean === cleanId || cleanId.includes(u.companyId) || (targetRole === 'admin' && (cleanId === 'douglas' || cleanId === 'admin'))
@@ -331,11 +379,24 @@ export async function authenticateWithSecurity(
     const numericInput = identifier.replace(/\D/g, '')
     if (numericInput.length >= 8) {
       if (numericInput.includes('28914832')) {
-        matchedUser = REGISTERED_ACCOUNTS.find((u) => u.companyId === 'cli-001')
+        matchedUser = allUsers.find((u) => u.companyId === 'cli-001')
       } else if (numericInput.includes('08412983')) {
-        matchedUser = REGISTERED_ACCOUNTS.find((u) => u.companyId === 'cli-002')
+        matchedUser = allUsers.find((u) => u.companyId === 'cli-002')
       } else if (numericInput.includes('14281049')) {
-        matchedUser = REGISTERED_ACCOUNTS.find((u) => u.companyId === 'cli-003')
+        matchedUser = allUsers.find((u) => u.companyId === 'cli-003')
+      } else {
+        try {
+          const companiesRaw = localStorage.getItem('rotta_client_companies_v2')
+          if (companiesRaw) {
+            const compList = JSON.parse(companiesRaw)
+            const foundComp = compList.find((c: any) => c.cnpj && c.cnpj.replace(/\D/g, '').includes(numericInput))
+            if (foundComp) {
+              matchedUser = allUsers.find((u) => u.companyId === foundComp.id)
+            }
+          }
+        } catch {
+          // ignore
+        }
       }
     }
   }

@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   MapPin,
   Gauge,
+  Printer,
 } from 'lucide-react'
 import type { ClientEquipment } from '../../types/clientPortal'
 import { getEquipmentImage } from '../../data/mockClientData'
@@ -38,9 +39,34 @@ export function ClientEquipments({
         </div>
       </div>
 
-      {/* Grid de Equipamentos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {equipments.map((eq) => {
+      {/* Grid de Equipamentos ou Estado Vazio */}
+      {equipments.length === 0 ? (
+        <div className="rounded-3xl bg-white border border-slate-200/90 shadow-2xs p-8 sm:p-12 text-center space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-blue-50 text-rotta-blue flex items-center justify-center mx-auto border border-blue-100">
+            <Printer size={32} />
+          </div>
+          <div className="max-w-md mx-auto space-y-2">
+            <h3 className="text-lg font-extrabold text-slate-900">
+              Nenhum equipamento vinculado no momento
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              O administrador da Rotta Tecnologia (<strong>Douglas Rotta</strong>) vinculará manualmente as impressoras e multifuncionais contratadas à sua empresa conforme o produto solicitado e o contrato aprovado.
+            </p>
+          </div>
+          <div className="pt-2">
+            <a
+              href="https://wa.me/5546988037656"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 hover:bg-rotta-navy text-white text-xs font-bold px-4 py-2.5 transition-colors cursor-pointer"
+            >
+              Falar com Douglas Rotta no WhatsApp
+            </a>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {equipments.map((eq) => {
           const isLowToner = eq.tonerBlack < 20
           const hasColor = eq.tonerCyan !== undefined
 
@@ -224,6 +250,7 @@ export function ClientEquipments({
           )
         })}
       </div>
+      )}
     </div>
   )
 }

@@ -4,7 +4,6 @@ import {
   Wrench,
   Package,
   Printer,
-  Gauge,
   DollarSign,
   LogOut,
   ArrowLeft,
@@ -20,12 +19,11 @@ import { ClientTicketDetailModal } from './ClientTicketDetailModal'
 import { ClientEquipments } from './ClientEquipments'
 import { ClientSupplies } from './ClientSupplies'
 import { ClientNewSupplyModal } from './ClientNewSupplyModal'
-import { ClientCounters } from './ClientCounters'
 import { ClientInvoices } from './ClientInvoices'
 
 import { AdminDashboard } from './AdminDashboard'
 import {
-  ALL_CLIENT_COMPANIES,
+  getAllClientCompanies,
   getPortalSession,
   savePortalSession,
   getClientTickets,
@@ -35,7 +33,6 @@ import {
   getClientSupplies,
   saveClientSupplies,
   getClientCounters,
-  saveClientCounters,
   getClientInvoices,
 } from '../../data/mockClientData'
 
@@ -56,7 +53,6 @@ export type PortalTab =
   | 'chamados'
   | 'equipamentos'
   | 'suprimentos'
-  | 'contadores'
   | 'financeiro'
 
 interface ClientPortalPageProps {
@@ -85,7 +81,7 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
   const [equipments, setEquipments] = useState<ClientEquipment[]>(() => getClientEquipments())
   const [tickets, setTickets] = useState<ClientTicket[]>(() => getClientTickets())
   const [supplies, setSupplies] = useState<SupplyOrder[]>(() => getClientSupplies())
-  const [counters, setCounters] = useState<CounterReading[]>(() => getClientCounters())
+  const [counters] = useState<CounterReading[]>(() => getClientCounters())
   const [invoices] = useState<ClientInvoice[]>(() => getClientInvoices())
 
   // Modais
@@ -122,9 +118,10 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
   }
 
   const handleLoginAdmin = (token?: string) => {
+    const allComps = getAllClientCompanies()
     const newSession: PortalSession = {
       role: 'admin',
-      company: ALL_CLIENT_COMPANIES[0],
+      company: allComps[0],
       adminName: 'Douglas Rotta',
       token,
       loginTimestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
@@ -246,29 +243,6 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
     showToast(`Pedido de suprimento ${newOrder.code} gerado com sucesso!`)
   }
 
-  // Handlers de Contadores
-  const handleSubmitCounters = (newReadings: CounterReading[]) => {
-    const updatedCounters = [...newReadings, ...counters]
-    setCounters(updatedCounters)
-    saveClientCounters(updatedCounters)
-
-    // Atualiza contador atual nos equipamentos
-    const updatedEquipments = equipments.map((eq) => {
-      const found = newReadings.find((r) => r.equipmentId === eq.id)
-      if (found) {
-        return {
-          ...eq,
-          currentCounterMono: found.monoReading,
-          currentCounterColor: found.colorReading ?? eq.currentCounterColor,
-        }
-      }
-      return eq
-    })
-    setEquipments(updatedEquipments)
-    saveClientEquipments(updatedEquipments)
-
-    showToast('Leituras mensais transmitidas e gravadas com sucesso!')
-  }
 
   // Quick action de suprimento vindo da tela de equipamentos
   const handleRequestSupplyFromEquipment = (eqId: string) => {
@@ -364,7 +338,7 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
 
         <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 flex-1">
           <AdminDashboard
-            companies={ALL_CLIENT_COMPANIES}
+            companies={getAllClientCompanies()}
             equipments={equipments}
             tickets={tickets}
             supplies={supplies}
@@ -398,14 +372,19 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
     )
   }
 
-  const openTicketsCount = tickets.filter((t) => t.status !== 'concluido').length
+  // Filtragem dos dados específicos da empresa logada
+  const clientEquipments = equipments.filter((eq) => !company || eq.companyId === company.id)
+  const clientTickets = tickets.filter((t) => !company || t.companyId === company.id)
+  const clientSupplies = supplies.filter((s) => !company || s.companyId === company.id)
+  const clientInvoices = invoices.filter((inv) => !company || inv.companyId === company.id)
+
+  const openTicketsCount = clientTickets.filter((t) => t.status !== 'concluido').length
 
   const tabs: { id: PortalTab; label: string; icon: React.ElementType; badge?: number }[] = [
     { id: 'dashboard', label: 'Visão Geral', icon: LayoutDashboard },
     { id: 'chamados', label: 'Chamados', icon: Wrench, badge: openTicketsCount },
     { id: 'equipamentos', label: 'Equipamentos', icon: Printer },
     { id: 'suprimentos', label: 'Suprimentos', icon: Package },
-    { id: 'contadores', label: 'Lançar Contadores', icon: Gauge },
     { id: 'financeiro', label: 'Faturas & 2ª Via', icon: DollarSign },
   ]
 
@@ -535,10 +514,10 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
         {activeTab === 'dashboard' && (
           <ClientDashboard
             company={company}
-            equipments={equipments}
-            tickets={tickets}
-            supplies={supplies}
-            invoices={invoices}
+            equipments={clientEquipments}
+            tickets={clientTickets}
+            supplies={clientSupplies}
+            invoices={clientInvoices}
             onOpenNewTicket={() => {
               setPreselectedEqForTicket(undefined)
               setIsNewTicketOpen(true)
@@ -554,7 +533,7 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
 
         {activeTab === 'chamados' && (
           <ClientTickets
-            tickets={tickets}
+            tickets={clientTickets}
             onOpenNewTicket={() => {
               setPreselectedEqForTicket(undefined)
               setIsNewTicketOpen(true)
@@ -565,7 +544,7 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
 
         {activeTab === 'equipamentos' && (
           <ClientEquipments
-            equipments={equipments}
+            equipments={clientEquipments}
             onRequestSupplyForEquipment={handleRequestSupplyFromEquipment}
             onOpenTicketForEquipment={handleOpenTicketFromEquipment}
           />
@@ -573,7 +552,7 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
 
         {activeTab === 'suprimentos' && (
           <ClientSupplies
-            supplies={supplies}
+            supplies={clientSupplies}
             onOpenNewSupply={() => {
               setPreselectedEqForSupply(undefined)
               setIsNewSupplyOpen(true)
@@ -581,16 +560,8 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
           />
         )}
 
-        {activeTab === 'contadores' && (
-          <ClientCounters
-            equipments={equipments}
-            counters={counters}
-            onSubmitCounters={handleSubmitCounters}
-          />
-        )}
-
         {activeTab === 'financeiro' && (
-          <ClientInvoices invoices={invoices} onShowToast={showToast} />
+          <ClientInvoices invoices={clientInvoices} onShowToast={showToast} />
         )}
       </main>
 
@@ -598,7 +569,7 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
       <ClientNewTicketModal
         isOpen={isNewTicketOpen}
         onClose={() => setIsNewTicketOpen(false)}
-        equipments={equipments}
+        equipments={clientEquipments}
         preselectedEquipmentId={preselectedEqForTicket}
         onSubmit={handleCreateTicket}
       />
@@ -613,7 +584,7 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
         isOpen={isNewSupplyOpen}
         onClose={() => setIsNewSupplyOpen(false)}
         company={company}
-        equipments={equipments}
+        equipments={clientEquipments}
         preselectedEquipmentId={preselectedEqForSupply}
         onSubmit={handleCreateSupplyOrder}
       />

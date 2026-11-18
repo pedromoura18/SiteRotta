@@ -522,11 +522,86 @@ export const DEFAULT_INVOICES: ClientInvoice[] = [
 // Storage Keys
 const STORAGE_KEYS = {
   SESSION: 'rotta_portal_session_v2',
+  COMPANIES: 'rotta_client_companies_v2',
   TICKETS: 'rotta_client_tickets_v2',
   EQUIPMENTS: 'rotta_client_equipments_v2',
   SUPPLIES: 'rotta_client_supplies_v2',
   COUNTERS: 'rotta_client_counters_v2',
   INVOICES: 'rotta_client_invoices_v2',
+}
+
+export function getAllClientCompanies(): ClientCompany[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.COMPANIES)
+    if (raw) {
+      const dynamicList: ClientCompany[] = JSON.parse(raw)
+      const dynamicIds = new Set(dynamicList.map((c) => c.id))
+      const combined = [
+        ...ALL_CLIENT_COMPANIES.filter((c) => !dynamicIds.has(c.id)),
+        ...dynamicList,
+      ]
+      return combined
+    }
+  } catch (e) {
+    console.warn('Erro ao ler empresas:', e)
+  }
+  return ALL_CLIENT_COMPANIES
+}
+
+export function saveClientCompany(company: ClientCompany): void {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.COMPANIES)
+    const list: ClientCompany[] = raw ? JSON.parse(raw) : []
+    const updated = [...list.filter((c) => c.id !== company.id), company]
+    localStorage.setItem(STORAGE_KEYS.COMPANIES, JSON.stringify(updated))
+  } catch (e) {
+    console.warn('Erro ao salvar empresa:', e)
+  }
+}
+
+export interface RegisterCompanyInput {
+  name: string
+  tradeName?: string
+  cnpj: string
+  contactPerson: string
+  email: string
+  phone: string
+  address?: string
+  city?: string
+  state?: string
+}
+
+export function registerNewCompanyAndSetup(input: RegisterCompanyInput): {
+  company: ClientCompany
+  invoice?: ClientInvoice
+} {
+  const companyId = `cli-${Date.now()}`
+  const contractYear = new Date().getFullYear()
+  const contractNum = `ROT-${contractYear}-${Math.floor(1000 + Math.random() * 9000)}`
+
+  const newCompany: ClientCompany = {
+    id: companyId,
+    name: input.name.trim(),
+    tradeName: input.tradeName?.trim() || input.name.trim(),
+    cnpj: input.cnpj.trim(),
+    contractNumber: contractNum,
+    plan: 'Aguardando Alocação de Equipamento pelo Gestor',
+    contactPerson: input.contactPerson.trim(),
+    email: input.email.trim().toLowerCase(),
+    phone: input.phone.trim(),
+    address: input.address?.trim() || 'Rua Central, 100',
+    city: input.city?.trim() || 'Francisco Beltrão',
+    state: input.state?.trim() || 'PR',
+    accountManager: 'Douglas Rotta',
+    managerPhone: '(46) 98803-7656',
+    slaHours: 3,
+    totalPrinters: 0,
+    monthlyContractValue: 0.0,
+  }
+
+  saveClientCompany(newCompany)
+
+  return { company: newCompany }
 }
 
 export function getPortalSession(): PortalSession | null {
