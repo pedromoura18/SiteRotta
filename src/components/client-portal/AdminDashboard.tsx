@@ -19,6 +19,12 @@ import {
   Globe,
   Terminal,
   Lock,
+  DollarSign,
+  FileText,
+  Plus,
+  CheckCircle2,
+  ShieldCheck,
+  X,
 } from 'lucide-react'
 import type {
   ClientCompany,
@@ -32,6 +38,8 @@ import type {
 } from '../../types/clientPortal'
 import { getEquipmentImage } from '../../data/mockClientData'
 import { executeTelemetrySync } from '../../utils/maquinaProSync'
+import { AdminCustomerDetailModal } from './AdminCustomerDetailModal'
+import { AdminInvoice2aViaModal } from './AdminInvoice2aViaModal'
 
 interface AdminDashboardProps {
   companies: ClientCompany[]
@@ -45,6 +53,8 @@ interface AdminDashboardProps {
   onUpdateSupplyStatus: (orderId: string, newStatus: SupplyOrderStatus, trackingCode?: string) => void
   onShowToast: (msg: string) => void
   onUpdateEquipments?: (newEqs: ClientEquipment[]) => void
+  onUpdateInvoices?: (newInvs: ClientInvoice[]) => void
+  onUpdateCompanies?: (newComps: ClientCompany[]) => void
 }
 
 export function AdminDashboard({
@@ -52,16 +62,18 @@ export function AdminDashboard({
   equipments,
   tickets,
   supplies,
-  counters: _counters,
-  invoices: _invoices,
+  counters,
+  invoices,
   onImpersonateCompany,
   onUpdateTicketStatus,
   onUpdateSupplyStatus,
   onShowToast,
   onUpdateEquipments,
+  onUpdateInvoices,
+  onUpdateCompanies,
 }: AdminDashboardProps) {
   const [adminTab, setAdminTab] = useState<
-    'visao-geral' | 'maquinapro' | 'chamados' | 'suprimentos' | 'equipamentos' | 'telemetria'
+    'visao-geral' | 'financeiro' | 'maquinapro' | 'chamados' | 'suprimentos' | 'equipamentos' | 'telemetria'
   >('visao-geral')
 
   // Estados da Integração Máquina Pro (app.maquinapro.app.br)
@@ -110,6 +122,70 @@ export function AdminDashboard({
   // Estado para envio de rastreio de toner
   const [selectedSupplyId, setSelectedSupplyId] = useState<string | null>(null)
   const [trackingInput, setTrackingInput] = useState('')
+
+  // Estado para visualização 360º de Detalhes do Cliente
+  const [selectedCompanyForDetail, setSelectedCompanyForDetail] = useState<ClientCompany | null>(null)
+
+  // Estado para visualização de 2ª Via de Fatura & Boleto
+  const [viewingInvoice2aVia, setViewingInvoice2aVia] = useState<ClientInvoice | null>(null)
+
+  // Filtros da aba geral Financeiro & Contratos
+  const [finSearch, setFinSearch] = useState('')
+  const [finCompanyFilter, setFinCompanyFilter] = useState('todos')
+  const [finStatusFilter, setFinStatusFilter] = useState('todos')
+
+  // Modal para emissão de nova fatura na aba geral Financeiro
+  const [isGeneralInvoiceModalOpen, setIsGeneralInvoiceModalOpen] = useState(false)
+  const [genInvCompanyId, setGenInvCompanyId] = useState(companies[0]?.id || '')
+  const [genInvPeriod, setGenInvPeriod] = useState('Novembro / 2026')
+  const [genInvDueDate, setGenInvDueDate] = useState('20/11/2026')
+  const [genInvValue, setGenInvValue] = useState(690)
+
+  // Handlers Financeiros
+  const handleToggleInvoice = (invId: string) => {
+    const updated = invoices.map((inv) => {
+      if (inv.id === invId) {
+        const nextStatus = inv.status === 'pago' ? ('aberto' as const) : ('pago' as const)
+        return {
+          ...inv,
+          status: nextStatus,
+          paidAt: nextStatus === 'pago' ? new Date().toLocaleDateString('pt-BR') : undefined,
+        }
+      }
+      return inv
+    })
+    if (onUpdateInvoices) {
+      onUpdateInvoices(updated)
+    }
+    onShowToast('Status da fatura atualizado com sucesso!')
+  }
+
+  const handleCreateGeneralInvoice = (e: React.FormEvent) => {
+    e.preventDefault()
+    const targetComp = companies.find((c) => c.id === genInvCompanyId) || companies[0]
+    if (!targetComp) return
+
+    const year = new Date().getFullYear()
+    const newInv: ClientInvoice = {
+      id: `inv-${Date.now()}`,
+      companyId: targetComp.id,
+      companyName: targetComp.name,
+      invoiceNumber: `FAT-${year}-${Math.floor(1000 + Math.random() * 9000)}`,
+      period: genInvPeriod.trim(),
+      dueDate: genInvDueDate.trim(),
+      value: Number(genInvValue) || targetComp.monthlyContractValue || 690,
+      status: 'aberto',
+      pixCode: `00020126580014br.gov.bcb.pix0136rotta-pix-${targetComp.id}`,
+      barCode: '34191.79001 01043.289148 32001.092201 1 98450000069000',
+    }
+
+    const updated = [newInv, ...invoices]
+    if (onUpdateInvoices) {
+      onUpdateInvoices(updated)
+    }
+    setIsGeneralInvoiceModalOpen(false)
+    onShowToast(`Fatura gerada com sucesso para ${targetComp.name}!`)
+  }
 
   // Métricas gerais
   const openTickets = tickets.filter((t) => t.status !== 'concluido')
@@ -241,6 +317,7 @@ export function AdminDashboard({
       <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-200">
         {[
           { id: 'visao-geral', label: 'Visão Geral & Clientes', icon: Users },
+          { id: 'financeiro', label: 'Financeiro & Contratos', icon: DollarSign },
           { id: 'maquinapro', label: 'Máquina Pro (Tempo Real)', icon: Server, badge: '🟢 Ao Vivo' },
           { id: 'chamados', label: `Todos os Chamados (${openTickets.length})`, icon: Wrench },
           { id: 'suprimentos', label: `Pedidos de Suprimentos (${pendingSupplies.length})`, icon: Package },
@@ -353,17 +430,299 @@ export function AdminDashboard({
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => onImpersonateCompany(comp)}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 hover:bg-rotta-blue text-white py-2.5 text-xs font-bold transition-colors shadow-2xs"
-                  >
-                    <Eye size={14} />
-                    <span>Visualizar como {comp.name.split(' ')[0]}</span>
-                  </button>
-                </div>
+                    <div className="space-y-2 pt-2 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => onImpersonateCompany(comp)}
+                        className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 hover:bg-rotta-blue text-white py-2.5 text-xs font-bold transition-colors shadow-2xs cursor-pointer"
+                      >
+                        <Eye size={14} />
+                        <span>Visualizar como {comp.name.split(' ')[0]}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCompanyForDetail(comp)}
+                        className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-rotta-blue border border-blue-200/80 py-2.5 text-xs font-bold transition-colors cursor-pointer"
+                      >
+                        <FileText size={14} />
+                        <span>Ver Detalhes do Cliente (Raio-X 360º)</span>
+                      </button>
+                    </div>
+                  </div>
               )
             })}
+          </div>
+        </div>
+      )}
+
+      {/* ── ABA: FINANCEIRO & CONTRATOS ── */}
+      {adminTab === 'financeiro' && (
+        <div className="space-y-6">
+          {/* Header & KPIs Financeiros */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="rounded-2xl bg-white p-5 border border-slate-200/90 shadow-2xs">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Faturamento Mensal em Contratos
+              </span>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="text-2xl font-black text-rotta-navy font-mono">
+                  R$ {totalMonthlyRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+              <span className="text-xs text-slate-400 mt-1 block">Receita recorrente contratada</span>
+            </div>
+
+            <div className="rounded-2xl bg-white p-5 border border-slate-200/90 shadow-2xs">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Faturas em Aberto este Mês
+              </span>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="text-2xl font-black text-amber-600 font-mono">
+                  R${' '}
+                  {invoices
+                    .filter((i) => i.status === 'aberto')
+                    .reduce((acc, i) => acc + i.value, 0)
+                    .toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </span>
+                <span className="text-xs text-slate-400">
+                  ({invoices.filter((i) => i.status === 'aberto').length} faturas)
+                </span>
+              </div>
+              <span className="text-xs text-amber-700 mt-1 block font-semibold">Aguardando liquidação</span>
+            </div>
+
+            <div className="rounded-2xl bg-white p-5 border border-slate-200/90 shadow-2xs">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Faturas Já Liquidadas
+              </span>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="text-2xl font-black text-emerald-700 font-mono">
+                  R${' '}
+                  {invoices
+                    .filter((i) => i.status === 'pago')
+                    .reduce((acc, i) => acc + i.value, 0)
+                    .toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </span>
+                <span className="text-xs text-slate-400">
+                  ({invoices.filter((i) => i.status === 'pago').length} faturas)
+                </span>
+              </div>
+              <span className="text-xs text-emerald-700 mt-1 block font-semibold">Pagamentos confirmados</span>
+            </div>
+
+            <div className="rounded-2xl bg-white p-5 border border-slate-200/90 shadow-2xs">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Carteira de Clientes
+              </span>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="text-2xl font-black text-slate-900">{companies.length}</span>
+                <span className="text-xs text-slate-400">contratos ativos</span>
+              </div>
+              <span className="text-xs text-slate-500 mt-1 block">Inadimplência sob controle</span>
+            </div>
+          </div>
+
+          {/* Seção 1: Central de Cobranças & 2ª Via de Todos os Clientes */}
+          <div className="rounded-3xl bg-white p-6 border border-slate-200/90 shadow-2xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                  <DollarSign size={18} className="text-emerald-600" />
+                  <span>Central de Cobranças, Boletos & 2ª Via ({invoices.length} faturas)</span>
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Consulte mensalidades, copie linhas digitáveis ou Pix e emita 2ª via imediata.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsGeneralInvoiceModalOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-xs font-bold transition-colors shadow-xs cursor-pointer self-start sm:self-auto"
+              >
+                <Plus size={14} />
+                <span>+ Emitir Nova Fatura / Cobrança</span>
+              </button>
+            </div>
+
+            {/* Barra de Filtros */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
+              <div className="relative flex-1">
+                <Search size={15} className="absolute left-3.5 top-2.5 text-slate-400" />
+                <input
+                  type="text"
+                  value={finSearch}
+                  onChange={(e) => setFinSearch(e.target.value)}
+                  placeholder="Pesquisar por cliente, número da fatura ou mês..."
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-9 pr-3 py-2 text-xs text-slate-900 focus:bg-white focus:outline-none"
+                />
+              </div>
+
+              <select
+                value={finCompanyFilter}
+                onChange={(e) => setFinCompanyFilter(e.target.value)}
+                className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none"
+              >
+                <option value="todos">Todos os Clientes</option>
+                {companies.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={finStatusFilter}
+                onChange={(e) => setFinStatusFilter(e.target.value)}
+                className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none"
+              >
+                <option value="todos">Todos os Status</option>
+                <option value="aberto">Apenas Aberto</option>
+                <option value="pago">Apenas Pago</option>
+                <option value="vencido">Apenas Vencido</option>
+              </select>
+            </div>
+
+            {/* Tabela de Faturas */}
+            <div className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-2xs">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+                  <tr>
+                    <th className="py-3 px-3.5">Cliente / Sacado</th>
+                    <th className="py-3 px-3.5">Fatura Nº</th>
+                    <th className="py-3 px-3.5">Competência</th>
+                    <th className="py-3 px-3.5">Vencimento</th>
+                    <th className="py-3 px-3.5 text-right">Valor</th>
+                    <th className="py-3 px-3.5 text-center">Status</th>
+                    <th className="py-3 px-3.5 text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {invoices
+                    .filter((inv) => {
+                      const matchSearch =
+                        inv.invoiceNumber.toLowerCase().includes(finSearch.toLowerCase()) ||
+                        inv.period.toLowerCase().includes(finSearch.toLowerCase()) ||
+                        (inv.companyName && inv.companyName.toLowerCase().includes(finSearch.toLowerCase()))
+                      const matchCompany = finCompanyFilter === 'todos' || inv.companyId === finCompanyFilter
+                      const matchStatus = finStatusFilter === 'todos' || inv.status === finStatusFilter
+                      return matchSearch && matchCompany && matchStatus
+                    })
+                    .map((inv) => {
+                      const isPaid = inv.status === 'pago'
+                      const comp = companies.find((c) => c.id === inv.companyId)
+
+                      return (
+                        <tr key={inv.id} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="py-3 px-3.5">
+                            <span className="font-bold text-slate-900 block">{comp?.name || inv.companyName}</span>
+                            <span className="font-mono text-[10px] text-slate-400">CNPJ: {comp?.cnpj || 'N/A'}</span>
+                          </td>
+                          <td className="py-3 px-3.5 font-mono font-bold text-slate-800">{inv.invoiceNumber}</td>
+                          <td className="py-3 px-3.5 font-semibold text-slate-700">{inv.period}</td>
+                          <td className="py-3 px-3.5 font-mono text-slate-600">{inv.dueDate}</td>
+                          <td className="py-3 px-3.5 text-right font-mono font-black text-slate-900">
+                            R$ {inv.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className="py-3 px-3.5 text-center">
+                            <span
+                              className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                              }`}
+                            >
+                              {isPaid ? <CheckCircle2 size={11} /> : <AlertTriangle size={11} />}
+                              <span>{isPaid ? 'Pago' : 'Aberto'}</span>
+                            </span>
+                          </td>
+                          <td className="py-3 px-3.5 text-right space-x-1.5">
+                            <button
+                              type="button"
+                              onClick={() => setViewingInvoice2aVia(inv)}
+                              className="inline-flex items-center gap-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-rotta-blue px-2.5 py-1 text-[11px] font-bold transition-colors cursor-pointer"
+                              title="Visualizar 2ª Via do Documento"
+                            >
+                              <FileText size={12} />
+                              <span>2ª Via</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleInvoice(inv.id)}
+                              className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-colors cursor-pointer ${
+                                isPaid
+                                  ? 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700'
+                              }`}
+                            >
+                              <Check size={12} />
+                              <span>{isPaid ? 'Reabrir' : 'Dar Baixa'}</span>
+                            </button>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Seção 2: Contratos Vigentes */}
+          <div className="rounded-3xl bg-white p-6 border border-slate-200/90 shadow-2xs space-y-4">
+            <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <ShieldCheck size={18} className="text-rotta-blue" />
+              <span>Contratos de Outsourcing Vigentes ({companies.length})</span>
+            </h3>
+
+            <div className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-2xs">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-100 text-[11px] font-bold text-slate-600 uppercase border-b border-slate-200">
+                  <tr>
+                    <th className="py-3 px-3.5">Contrato Nº</th>
+                    <th className="py-3 px-3.5">Empresa / Cliente</th>
+                    <th className="py-3 px-3.5">Escopo do Plano</th>
+                    <th className="py-3 px-3.5 text-center">SLA</th>
+                    <th className="py-3 px-3.5 text-center">Máquinas</th>
+                    <th className="py-3 px-3.5 text-right">Mensalidade</th>
+                    <th className="py-3 px-3.5 text-right">Ação</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {companies.map((c) => {
+                    const cEquips = equipments.filter((e) => e.companyId === c.id)
+
+                    return (
+                      <tr key={c.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-3 px-3.5 font-mono font-bold text-rotta-blue">{c.contractNumber}</td>
+                        <td className="py-3 px-3.5">
+                          <span className="font-bold text-slate-900 block">{c.name}</span>
+                          <span className="text-[11px] text-slate-500">
+                            {c.city} - {c.state} • A/C: {c.contactPerson}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3.5 text-slate-600 max-w-xs truncate">{c.plan}</td>
+                        <td className="py-3 px-3.5 text-center font-bold text-emerald-700">Até {c.slaHours}h úteis</td>
+                        <td className="py-3 px-3.5 text-center font-bold text-rotta-navy">{cEquips.length} máq.</td>
+                        <td className="py-3 px-3.5 text-right font-mono font-black text-slate-900">
+                          R$ {c.monthlyContractValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="py-3 px-3.5 text-right">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedCompanyForDetail(c)
+                            }}
+                            className="inline-flex items-center gap-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-rotta-blue px-2.5 py-1 text-[11px] font-bold transition-colors cursor-pointer"
+                          >
+                            <FileText size={12} />
+                            <span>Ver Raio-X</span>
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -1235,6 +1594,166 @@ export function AdminDashboard({
             <p className="leading-relaxed">
               Enquanto o coletor SNMP ou integração com PrintWayy estiver sendo configurada, o portal já está perfeitamente funcional para o que gera mais valor no dia a dia: <strong>abertura e resposta de chamados com SLA</strong>, <strong>pedidos de toner com rastreio</strong>, <strong>faturas com Pix automático</strong> e <strong>lançamento de contadores mensais</strong>.
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: RAIO-X 360º DE DETALHES DO CLIENTE ── */}
+      {selectedCompanyForDetail && (
+        <AdminCustomerDetailModal
+          company={selectedCompanyForDetail}
+          equipments={equipments}
+          tickets={tickets}
+          supplies={supplies}
+          counters={counters}
+          invoices={invoices}
+          onClose={() => setSelectedCompanyForDetail(null)}
+          onImpersonate={(comp) => {
+            setSelectedCompanyForDetail(null)
+            onImpersonateCompany(comp)
+          }}
+          onUpdateEquipments={(newEqs) => {
+            if (onUpdateEquipments) {
+              onUpdateEquipments(newEqs)
+            }
+          }}
+          onUpdateCompany={(updatedComp) => {
+            if (onUpdateCompanies) {
+              onUpdateCompanies(companies.map((c) => (c.id === updatedComp.id ? updatedComp : c)))
+            }
+            setSelectedCompanyForDetail(updatedComp)
+          }}
+          onUpdateInvoices={(newInvs) => {
+            if (onUpdateInvoices) {
+              onUpdateInvoices(newInvs)
+            }
+          }}
+          onUpdateTicketStatus={onUpdateTicketStatus}
+          onUpdateSupplyStatus={onUpdateSupplyStatus}
+          onView2aVia={(inv) => setViewingInvoice2aVia(inv)}
+          onShowToast={onShowToast}
+        />
+      )}
+
+      {/* ── MODAL: 2ª VIA DE FATURA E BOLETO ── */}
+      {viewingInvoice2aVia && (
+        <AdminInvoice2aViaModal
+          invoice={viewingInvoice2aVia}
+          company={companies.find((c) => c.id === viewingInvoice2aVia.companyId)}
+          onClose={() => setViewingInvoice2aVia(null)}
+          onShowToast={onShowToast}
+        />
+      )}
+
+      {/* ── MODAL: EMISSÃO DE NOVA FATURA GERAL ── */}
+      {isGeneralInvoiceModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+          <div className="w-full max-w-lg rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="bg-gradient-to-r from-slate-900 via-rotta-navy to-rotta-blue p-5 text-white flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-amber-300">
+                  <DollarSign size={20} />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base">Emitir Fatura de Locação / Cobrança</h3>
+                  <p className="text-xs text-slate-300">Geração imediata com Pix e Boleto bancário</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsGeneralInvoiceModalOpen(false)}
+                className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateGeneralInvoice} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Cliente / Empresa Destinatária:
+                </label>
+                <select
+                  value={genInvCompanyId}
+                  onChange={(e) => setGenInvCompanyId(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:bg-white focus:outline-none"
+                >
+                  {companies.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name} — Contrato: {c.contractNumber}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Mês de Competência:
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={genInvPeriod}
+                    onChange={(e) => setGenInvPeriod(e.target.value)}
+                    placeholder="Ex: Novembro / 2026"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Data de Vencimento:
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={genInvDueDate}
+                    onChange={(e) => setGenInvDueDate(e.target.value)}
+                    placeholder="Ex: 20/11/2026"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Valor Total da Cobrança (R$):
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  required
+                  value={genInvValue}
+                  onChange={(e) => setGenInvValue(Number(e.target.value))}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-mono font-bold text-slate-900 focus:bg-white focus:outline-none"
+                />
+              </div>
+
+              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-1">
+                <span className="font-bold text-slate-700 block">Automação de Faturamento:</span>
+                <p>
+                  O sistema gerará automaticamente o QR Code Pix com chave oficial e a linha digitável do boleto para visualização imediata do cliente.
+                </p>
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setIsGeneralInvoiceModalOpen(false)}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-sm cursor-pointer"
+                >
+                  <Plus size={14} />
+                  <span>Confirmar & Emitir Fatura</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

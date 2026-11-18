@@ -34,6 +34,8 @@ import {
   saveClientSupplies,
   getClientCounters,
   getClientInvoices,
+  saveClientInvoices,
+  saveAllClientCompanies,
 } from '../../data/mockClientData'
 
 import type {
@@ -82,12 +84,13 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
   // Aba ativa
   const [activeTab, setActiveTab] = useState<PortalTab>('dashboard')
 
-  // Dados do Cliente
+  // Dados do Cliente & Gestão
+  const [companies, setCompanies] = useState<ClientCompany[]>(() => getAllClientCompanies())
   const [equipments, setEquipments] = useState<ClientEquipment[]>(() => getClientEquipments())
   const [tickets, setTickets] = useState<ClientTicket[]>(() => getClientTickets())
   const [supplies, setSupplies] = useState<SupplyOrder[]>(() => getClientSupplies())
   const [counters] = useState<CounterReading[]>(() => getClientCounters())
-  const [invoices] = useState<ClientInvoice[]>(() => getClientInvoices())
+  const [invoices, setInvoices] = useState<ClientInvoice[]>(() => getClientInvoices())
 
   // Modais
   const [isNewTicketOpen, setIsNewTicketOpen] = useState(false)
@@ -344,15 +347,23 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
 
         <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 flex-1">
           <AdminDashboard
-            companies={getAllClientCompanies()}
+            companies={companies}
             equipments={equipments}
             tickets={tickets}
             supplies={supplies}
             counters={counters}
             invoices={invoices}
-            onUpdateEquipments={(newEqs) => {
+            onUpdateEquipments={(newEqs: ClientEquipment[]) => {
               setEquipments(newEqs)
               saveClientEquipments(newEqs)
+            }}
+            onUpdateInvoices={(newInvs: ClientInvoice[]) => {
+              setInvoices(newInvs)
+              saveClientInvoices(newInvs)
+            }}
+            onUpdateCompanies={(newComps: ClientCompany[]) => {
+              setCompanies(newComps)
+              saveAllClientCompanies(newComps)
             }}
             onImpersonateCompany={(comp) => {
               const s: PortalSession = { role: 'client', company: comp, adminName: 'Douglas Rotta' }

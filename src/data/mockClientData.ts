@@ -749,3 +749,19 @@ export function getClientInvoices(): ClientInvoice[] {
   }
   return DEFAULT_INVOICES
 }
+
+export function saveClientInvoices(invoices: ClientInvoice[]) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.INVOICES, JSON.stringify(invoices))
+  } catch (e) {
+    console.warn('Erro ao salvar faturas:', e)
+  }
+}
+
+export function saveAllClientCompanies(companies: ClientCompany[]) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.COMPANIES, JSON.stringify(companies))
+  } catch (e) {
+    console.warn('Erro ao salvar lista de empresas:', e)
+  }
+}
