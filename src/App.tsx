@@ -42,7 +42,7 @@ export default function App() {
         setCurrentPage('contato')
       } else if (hash === '#/area-cliente') {
         setCurrentPage('area-cliente')
-      } else if (hash === '#/diretoria' || hash === '#/admin') {
+      } else if (hash === '#/diretoria' || hash === '#/admin' || hash === '#/gestao') {
         setCurrentPage('diretoria')
       } else {
         setCurrentPage('home')

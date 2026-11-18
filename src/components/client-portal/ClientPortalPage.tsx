@@ -68,7 +68,12 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
   // Modo de visualização de Login (Cliente vs Dono / Diretoria)
   const [loginView, setLoginView] = useState<'client' | 'director'>(() => {
     if (initialRole === 'director') return 'director'
-    if (typeof window !== 'undefined' && (window.location.hash === '#/diretoria' || window.location.hash === '#/admin')) {
+    if (
+      typeof window !== 'undefined' &&
+      (window.location.hash === '#/diretoria' ||
+        window.location.hash === '#/admin' ||
+        window.location.hash === '#/gestao')
+    ) {
       return 'director'
     }
     return 'client'
@@ -264,7 +269,11 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
           onLoginAdmin={handleLoginAdmin}
           onBackToClientLogin={() => {
             setLoginView('client')
-            if (window.location.hash === '#/diretoria' || window.location.hash === '#/admin') {
+            if (
+              window.location.hash === '#/diretoria' ||
+              window.location.hash === '#/admin' ||
+              window.location.hash === '#/gestao'
+            ) {
               window.location.hash = '#/area-cliente'
             }
           }}
@@ -276,11 +285,8 @@ export function ClientPortalPage({ onNavigateHome, initialRole }: ClientPortalPa
     return (
       <ClientLogin
         onLoginClient={handleLoginClient}
+        onLoginAdmin={handleLoginAdmin}
         onBackToSite={onNavigateHome}
-        onNavigateDirector={() => {
-          setLoginView('director')
-          window.location.hash = '#/diretoria'
-        }}
       />
     )
   }

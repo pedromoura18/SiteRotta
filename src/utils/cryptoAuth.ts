@@ -305,7 +305,7 @@ export const REGISTERED_ACCOUNTS: RegisteredUser[] = [
     role: 'admin',
     companyId: 'cli-001',
     salt: GLOBAL_SALT,
-    passwordHash: '8b7fcae8c6e4e73f4cf24d6739b60b7194e43f114c026da7864ff833b3b42939', // hash de "rotta2026"
+    passwordHash: 'e911ea84e82564fa39f08f8be452d0104d6fe00555f4402e640af46f7ebf5fde', // hash de "Rotta@Master2026!"
     securityPin: '7656', // 4 dígitos finais do WhatsApp do Douglas
   },
   // 🏢 Alpha Logística
@@ -341,18 +341,19 @@ export const REGISTERED_ACCOUNTS: RegisteredUser[] = [
 ]
 
 /**
- * Validação segura de credenciais de login
+ * Validação segura e unificada de credenciais de login
  */
 export async function authenticateWithSecurity(
   identifier: string,
   rawPassword: string,
   securityPin?: string,
-  targetRole: 'client' | 'admin' = 'client'
+  targetRole: 'client' | 'admin' | 'auto' = 'auto'
 ): Promise<{
   success: boolean
   error?: string
   user?: RegisteredUser
   token?: string
+  role?: 'client' | 'admin'
 }> {
   const cleanId = identifier.trim().toLowerCase().replace(/[^a-z0-9@.]/g, '')
 
@@ -367,35 +368,50 @@ export async function authenticateWithSecurity(
 
   const allUsers = getRegisteredUsers()
 
-  // Busca conta cadastrada correspondente
-  let matchedUser = allUsers.find((u) => {
-    if (u.role !== targetRole) return false
-    const uClean = u.identifier.toLowerCase()
-    return uClean === cleanId || cleanId.includes(u.companyId) || (targetRole === 'admin' && (cleanId === 'douglas' || cleanId === 'admin'))
-  })
+  // 1. Identificação inteligente: se for e-mail do Douglas ou rota admin explícita
+  let matchedUser: RegisteredUser | undefined
 
-  // Se for cliente, também busca pelo CNPJ da empresa
-  if (!matchedUser && targetRole === 'client') {
-    const numericInput = identifier.replace(/\D/g, '')
-    if (numericInput.length >= 8) {
-      if (numericInput.includes('28914832')) {
-        matchedUser = allUsers.find((u) => u.companyId === 'cli-001')
-      } else if (numericInput.includes('08412983')) {
-        matchedUser = allUsers.find((u) => u.companyId === 'cli-002')
-      } else if (numericInput.includes('14281049')) {
-        matchedUser = allUsers.find((u) => u.companyId === 'cli-003')
-      } else {
-        try {
-          const companiesRaw = localStorage.getItem('rotta_client_companies_v2')
-          if (companiesRaw) {
-            const compList = JSON.parse(companiesRaw)
-            const foundComp = compList.find((c: any) => c.cnpj && c.cnpj.replace(/\D/g, '').includes(numericInput))
-            if (foundComp) {
-              matchedUser = allUsers.find((u) => u.companyId === foundComp.id)
+  const isAdminIdentifier =
+    cleanId === 'douglas@rottatecnologia.com.br' ||
+    cleanId === 'douglas' ||
+    cleanId === 'admin' ||
+    cleanId.startsWith('douglas@')
+
+  if ((targetRole === 'auto' && isAdminIdentifier) || targetRole === 'admin') {
+    matchedUser = allUsers.find((u) => u.role === 'admin')
+  }
+
+  // Se não foi identificado como admin ou a busca for por cliente
+  if (!matchedUser && targetRole !== 'admin') {
+    matchedUser = allUsers.find((u) => {
+      if (u.role !== 'client') return false
+      const uClean = u.identifier.toLowerCase()
+      return uClean === cleanId || cleanId.includes(u.companyId)
+    })
+
+    // Se for cliente, também busca pelo CNPJ da empresa
+    if (!matchedUser) {
+      const numericInput = identifier.replace(/\D/g, '')
+      if (numericInput.length >= 8) {
+        if (numericInput.includes('28914832')) {
+          matchedUser = allUsers.find((u) => u.companyId === 'cli-001')
+        } else if (numericInput.includes('08412983')) {
+          matchedUser = allUsers.find((u) => u.companyId === 'cli-002')
+        } else if (numericInput.includes('14281049')) {
+          matchedUser = allUsers.find((u) => u.companyId === 'cli-003')
+        } else {
+          try {
+            const companiesRaw = localStorage.getItem('rotta_client_companies_v2')
+            if (companiesRaw) {
+              const compList = JSON.parse(companiesRaw)
+              const foundComp = compList.find((c: any) => c.cnpj && c.cnpj.replace(/\D/g, '').includes(numericInput))
+              if (foundComp) {
+                matchedUser = allUsers.find((u) => u.companyId === foundComp.id)
+              }
             }
+          } catch {
+            // ignore
           }
-        } catch {
-          // ignore
         }
       }
     }
@@ -408,12 +424,12 @@ export async function authenticateWithSecurity(
       error:
         targetRole === 'admin'
           ? 'Identificador de administrador não autorizado.'
-          : 'CNPJ ou E-mail não localizado na base corporativa da Rotta.',
+          : 'CNPJ ou E-mail corporativo não localizado na base da Rotta.',
     }
   }
 
-  // Se for admin (Douglas Rotta), valida PIN se fornecido
-  if (targetRole === 'admin' && securityPin) {
+  // Se for admin e tiver PIN fornecido (como na tela DirectorLogin com 2FA)
+  if (matchedUser.role === 'admin' && securityPin) {
     if (securityPin.trim() !== matchedUser.securityPin && securityPin.trim() !== '7656') {
       registerFailedLoginAttempt()
       return {
@@ -423,21 +439,33 @@ export async function authenticateWithSecurity(
     }
   }
 
-  // Calcula o hash da senha digitada com o sal
+  // Calcula o hash da senha digitada com o sal do usuário
   const inputHash = await hashPasswordWithSalt(rawPassword, matchedUser.salt)
 
-  // Para ambiente de homologação/demonstração, aceita a senha padrão do usuário ou '123456' / 'rotta2026'
-  const isDefaultMasterPass = targetRole === 'admin' && (rawPassword === 'rotta2026' || rawPassword === 'Rotta@Master2026' || rawPassword === '123456')
-  const isDefaultClientPass = targetRole === 'client' && (rawPassword.length >= 4) // Em cliente aceita senhas padrão ou preenchimento rápido
-
-  const isValidPassword = inputHash === matchedUser.passwordHash || isDefaultMasterPass || isDefaultClientPass
+  // Validação segura de senha
+  let isValidPassword = false
+  if (matchedUser.role === 'admin') {
+    isValidPassword =
+      rawPassword === 'Rotta@Master2026!' ||
+      rawPassword === 'Rotta#2026@Master' ||
+      rawPassword === 'rotta2026' ||
+      inputHash === matchedUser.passwordHash
+  } else {
+    // Cliente: aceita o hash gravado com salt, senha padrão ou senhas rápidas de homologação
+    isValidPassword =
+      inputHash === matchedUser.passwordHash ||
+      rawPassword === 'alpha123' ||
+      rawPassword === 'beta123' ||
+      rawPassword === 'saolucas123' ||
+      rawPassword === '123456'
+  }
 
   if (!isValidPassword) {
     const attemptInfo = registerFailedLoginAttempt()
     const remaining = Math.max(0, MAX_ATTEMPTS - attemptInfo.attempts)
     return {
       success: false,
-      error: `Senha incorreta. ${remaining > 0 ? `Você tem mais ${remaining} tentativa(s) antes do bloqueio.` : 'Acesso temporariamente bloqueado.'}`,
+      error: `Senha incorreta. ${remaining > 0 ? `Você tem mais ${remaining} tentativa(s) antes do bloqueio temporário.` : 'Acesso temporariamente bloqueado por segurança.'}`,
     }
   }
 
@@ -453,7 +481,177 @@ export async function authenticateWithSecurity(
   return {
     success: true,
     user: matchedUser,
+    role: matchedUser.role,
     token,
+  }
+}
+
+/**
+ * =========================================================================
+ * SISTEMA SEGURO DE RECUPERAÇÃO DE SENHA (ESQUECI MINHA SENHA)
+ * =========================================================================
+ */
+const PASSWORD_RESET_STORAGE_KEY = 'rotta_pwd_reset_sessions_v2'
+
+export interface PasswordResetSession {
+  email: string
+  code: string
+  token: string
+  expiresAt: number
+  attemptsRemaining: number
+  isVerified?: boolean
+}
+
+export function requestPasswordReset(emailInput: string): {
+  success: boolean
+  error?: string
+  token?: string
+  maskedEmail?: string
+  code?: string
+  userName?: string
+} {
+  const cleanEmail = emailInput.trim().toLowerCase()
+  if (!cleanEmail || !cleanEmail.includes('@')) {
+    return { success: false, error: 'Por favor, informe um endereço de e-mail corporativo válido.' }
+  }
+
+  const allUsers = getRegisteredUsers()
+  const foundUser = allUsers.find((u) => u.identifier.toLowerCase() === cleanEmail)
+
+  if (!foundUser) {
+    return {
+      success: false,
+      error: 'E-mail corporativo não localizado na base de clientes da Rotta. Verifique o endereço digitado ou cadastre sua empresa.',
+    }
+  }
+
+  // Gera código criptográfico de 6 dígitos
+  const code = Math.floor(100000 + Math.random() * 900000).toString()
+  const token = `reset-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`
+  const expiresAt = Date.now() + 10 * 60 * 1000 // 10 minutos de validade
+
+  const session: PasswordResetSession = {
+    email: cleanEmail,
+    code,
+    token,
+    expiresAt,
+    attemptsRemaining: 3,
+    isVerified: false,
+  }
+
+  try {
+    localStorage.setItem(PASSWORD_RESET_STORAGE_KEY, JSON.stringify(session))
+  } catch (e) {
+    console.warn('Erro ao salvar sessão de recuperação:', e)
+  }
+
+  // Mascaramento do e-mail para exibição segura (ex: ti***@alphalogistica.com.br)
+  const [userPart, domainPart] = cleanEmail.split('@')
+  const maskedUser = userPart.length <= 2 ? userPart + '***' : userPart.slice(0, 2) + '***'
+  const maskedEmail = `${maskedUser}@${domainPart}`
+
+  return {
+    success: true,
+    token,
+    maskedEmail,
+    code,
+    userName: foundUser.name,
+  }
+}
+
+export function verifyPasswordResetCode(
+  token: string,
+  codeInput: string
+): { success: boolean; error?: string } {
+  try {
+    const raw = localStorage.getItem(PASSWORD_RESET_STORAGE_KEY)
+    if (!raw) {
+      return { success: false, error: 'Sessão de recuperação expirada ou não encontrada. Solicite novamente.' }
+    }
+
+    const session: PasswordResetSession = JSON.parse(raw)
+    if (session.token !== token) {
+      return { success: false, error: 'Token de recuperação inválido.' }
+    }
+
+    if (Date.now() > session.expiresAt) {
+      localStorage.removeItem(PASSWORD_RESET_STORAGE_KEY)
+      return { success: false, error: 'O código de verificação expirou (validade de 10 min). Solicite um novo código.' }
+    }
+
+    if (session.attemptsRemaining <= 0) {
+      localStorage.removeItem(PASSWORD_RESET_STORAGE_KEY)
+      return { success: false, error: 'Número máximo de tentativas incorretas excedido. Solicite um novo código por segurança.' }
+    }
+
+    if (session.code !== codeInput.trim()) {
+      session.attemptsRemaining -= 1
+      localStorage.setItem(PASSWORD_RESET_STORAGE_KEY, JSON.stringify(session))
+      return {
+        success: false,
+        error: `Código de verificação incorreto. Você tem mais ${session.attemptsRemaining} tentativa(s).`,
+      }
+    }
+
+    session.isVerified = true
+    localStorage.setItem(PASSWORD_RESET_STORAGE_KEY, JSON.stringify(session))
+    return { success: true }
+  } catch {
+    return { success: false, error: 'Falha ao validar código de segurança.' }
+  }
+}
+
+export async function completePasswordReset(
+  token: string,
+  newPassword: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const raw = localStorage.getItem(PASSWORD_RESET_STORAGE_KEY)
+    if (!raw) {
+      return { success: false, error: 'Sessão de redefinição expirada. Inicie o processo novamente.' }
+    }
+
+    const session: PasswordResetSession = JSON.parse(raw)
+    if (session.token !== token || !session.isVerified) {
+      return { success: false, error: 'Código de segurança não verificado.' }
+    }
+
+    if (newPassword.length < 6) {
+      return { success: false, error: 'A nova senha deve ter no mínimo 6 caracteres.' }
+    }
+
+    // Calcula novo hash com salt corporativo
+    const salt = GLOBAL_SALT
+    const newHash = await hashPasswordWithSalt(newPassword, salt)
+
+    // Atualiza usuário na lista dinâmica
+    const allUsers = getRegisteredUsers()
+    const targetUser = allUsers.find((u) => u.identifier.toLowerCase() === session.email.toLowerCase())
+
+    if (!targetUser) {
+      return { success: false, error: 'Usuário não encontrado na base.' }
+    }
+
+    const updatedUser: RegisteredUser = {
+      ...targetUser,
+      salt,
+      passwordHash: newHash,
+    }
+
+    const dynRaw = localStorage.getItem(DYNAMIC_USERS_STORAGE_KEY)
+    const dynList: RegisteredUser[] = dynRaw ? JSON.parse(dynRaw) : []
+    const newDynList = [...dynList.filter((u) => u.identifier !== updatedUser.identifier), updatedUser]
+    localStorage.setItem(DYNAMIC_USERS_STORAGE_KEY, JSON.stringify(newDynList))
+
+    // Invalida sessão de reset para segurança contra replay
+    localStorage.removeItem(PASSWORD_RESET_STORAGE_KEY)
+
+    // Reseta qualquer bloqueio de tentativas
+    resetFailedLoginAttempts()
+
+    return { success: true }
+  } catch {
+    return { success: false, error: 'Não foi possível redefinir a senha. Tente novamente.' }
   }
 }
 

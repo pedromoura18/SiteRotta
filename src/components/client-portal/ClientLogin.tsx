@@ -21,6 +21,7 @@ import {
   Mail,
   MapPin,
   Check,
+  X,
 } from 'lucide-react'
 import {
   getAllClientCompanies,
@@ -35,20 +36,23 @@ import {
   checkBruteForceLockout,
   saveNewRegisteredUser,
   generateSessionToken,
+  requestPasswordReset,
+  verifyPasswordResetCode,
+  completePasswordReset,
 } from '../../utils/cryptoAuth'
 
 interface ClientLoginProps {
   onLoginClient?: (company: ClientCompany, token?: string) => void
   onLogin?: (company: ClientCompany, token?: string) => void
+  onLoginAdmin?: (token?: string) => void
   onBackToSite: () => void
-  onNavigateDirector?: () => void
 }
 
 export function ClientLogin({
   onLoginClient,
   onLogin,
+  onLoginAdmin,
   onBackToSite,
-  onNavigateDirector,
 }: ClientLoginProps) {
   // Alternância entre Login e Registro
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
@@ -79,10 +83,19 @@ export function ClientLogin({
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [lockoutRemaining, setLockoutRemaining] = useState<number>(0)
 
-  // Modal de recuperação de senha
+  // Modal de Recuperação de Senha Segura (Multi-Etapas)
   const [showForgotModal, setShowForgotModal] = useState(false)
-  const [forgotEmail, setForgotEmail] = useState('')
-  const [forgotSuccess, setForgotSuccess] = useState(false)
+  const [resetStep, setResetStep] = useState<1 | 2 | 3 | 4>(1)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetMaskedEmail, setResetMaskedEmail] = useState('')
+  const [resetToken, setResetToken] = useState('')
+  const [resetSimulatedCode, setResetSimulatedCode] = useState('')
+  const [resetCodeInput, setResetCodeInput] = useState('')
+  const [resetNewPassword, setResetNewPassword] = useState('')
+  const [resetConfirmPassword, setResetConfirmPassword] = useState('')
+  const [resetShowPassword, setResetShowPassword] = useState(false)
+  const [resetError, setResetError] = useState<string | null>(null)
+  const [resetIsLoading, setResetIsLoading] = useState(false)
 
   // Avaliação de força de senha
   const currentPasswordForStrength = authMode === 'login' ? password : regPassword
@@ -169,7 +182,7 @@ export function ClientLogin({
         identifier,
         password,
         undefined,
-        'client'
+        'auto'
       )
 
       if (!authResult.success) {
@@ -179,6 +192,17 @@ export function ClientLogin({
           setLockoutRemaining(status.remainingSeconds)
         }
         setIsLoading(false)
+        return
+      }
+
+      // Se for Administrador Master (Douglas Rotta)
+      if (authResult.role === 'admin' || authResult.user?.role === 'admin') {
+        setSuccessMessage('Acesso Master de Administrador reconhecido! Abrindo Painel Gerencial...')
+        setTimeout(() => {
+          if (onLoginAdmin) {
+            onLoginAdmin(authResult.token)
+          }
+        }, 500)
         return
       }
 
@@ -297,15 +321,87 @@ export function ClientLogin({
     }
   }
 
-  const handleForgotSubmit = (e: React.FormEvent) => {
+  const resetPasswordStrength = evaluatePasswordStrength(resetNewPassword)
+
+  // Handlers do Modal de Recuperação de Senha
+  const handleOpenForgotModal = () => {
+    setResetStep(1)
+    setResetEmail(identifier.includes('@') ? identifier : '')
+    setResetError(null)
+    setResetCodeInput('')
+    setResetNewPassword('')
+    setResetConfirmPassword('')
+    setShowForgotModal(true)
+  }
+
+  const handleRequestResetCode = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!forgotEmail) return
-    setForgotSuccess(true)
+    setResetError(null)
+    setResetIsLoading(true)
+
     setTimeout(() => {
-      setForgotSuccess(false)
-      setShowForgotModal(false)
-      setForgotEmail('')
-    }, 2500)
+      const res = requestPasswordReset(resetEmail)
+      setResetIsLoading(false)
+      if (!res.success) {
+        setResetError(res.error || 'Erro ao localizar conta.')
+        return
+      }
+
+      setResetToken(res.token || '')
+      setResetMaskedEmail(res.maskedEmail || resetEmail)
+      setResetSimulatedCode(res.code || '')
+      setResetStep(2)
+    }, 400)
+  }
+
+  const handleVerifyResetCode = (e: React.FormEvent) => {
+    e.preventDefault()
+    setResetError(null)
+
+    if (resetCodeInput.trim().length !== 6) {
+      setResetError('O código de segurança deve ter exatamente 6 dígitos.')
+      return
+    }
+
+    setResetIsLoading(true)
+    setTimeout(() => {
+      const res = verifyPasswordResetCode(resetToken, resetCodeInput)
+      setResetIsLoading(false)
+      if (!res.success) {
+        setResetError(res.error || 'Código incorreto.')
+        return
+      }
+
+      setResetStep(3)
+    }, 350)
+  }
+
+  const handleCompleteReset = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setResetError(null)
+
+    if (resetNewPassword.length < 6) {
+      setResetError('A nova senha deve ter no mínimo 6 caracteres.')
+      return
+    }
+
+    if (resetNewPassword !== resetConfirmPassword) {
+      setResetError('As senhas digitadas não coincidem.')
+      return
+    }
+
+    setResetIsLoading(true)
+    const res = await completePasswordReset(resetToken, resetNewPassword)
+    setResetIsLoading(false)
+
+    if (!res.success) {
+      setResetError(res.error || 'Falha ao redefinir a senha.')
+      return
+    }
+
+    setResetStep(4)
+    setIdentifier(resetEmail)
+    setPassword(resetNewPassword)
   }
 
   return (
@@ -459,7 +555,7 @@ export function ClientLogin({
                     </label>
                     <button
                       type="button"
-                      onClick={() => setShowForgotModal(true)}
+                      onClick={handleOpenForgotModal}
                       className="text-xs font-medium text-rotta-blue hover:underline cursor-pointer"
                     >
                       Esqueceu a senha?
@@ -871,65 +967,332 @@ export function ClientLogin({
             </div>
           </div>
 
-          {/* Link Discreto para Área da Diretoria */}
-          {onNavigateDirector && (
-            <div className="text-center mt-4">
-              <button
-                type="button"
-                onClick={onNavigateDirector}
-                className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-700 transition-colors py-1 px-2 rounded-lg hover:bg-slate-100 cursor-pointer"
-                title="Acesso Exclusivo da Diretoria Rotta"
-              >
-                <Lock size={12} />
-                <span>Acesso Restrito à Diretoria</span>
-              </button>
-            </div>
-          )}
         </div>
       </main>
 
-      {/* ── Modal de Esqueci Minha Senha ── */}
+      {/* ── Modal Seguro de Redefinição de Senha (Multi-Etapas) ── */}
       {showForgotModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200">
-            <h3 className="text-lg font-bold text-slate-900 mb-1">Recuperar Acesso</h3>
-            <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-              Informe o e-mail cadastrado na sua empresa para receber as instruções de redefinição de senha.
-            </p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-fadeIn">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-slate-200 relative overflow-hidden">
+            <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-rotta-blue via-cyan-500 to-indigo-600" />
 
-            {forgotSuccess ? (
-              <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-center space-y-1.5">
-                <CheckCircle2 size={28} className="text-emerald-500 mx-auto" />
-                <p className="text-sm font-bold text-emerald-800">E-mail de recuperação enviado!</p>
-                <p className="text-xs text-slate-500">Verifique sua caixa de entrada e spam.</p>
+            {/* Cabeçalho do Modal */}
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 text-rotta-blue flex items-center justify-center border border-blue-100">
+                  <KeyRound size={18} />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900 leading-snug">
+                    Recuperação Segura de Senha
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Etapa {resetStep} de 3 • Autenticação com Criptografia SHA-256
+                  </p>
+                </div>
               </div>
-            ) : (
-              <form onSubmit={handleForgotSubmit} className="space-y-4">
-                <input
-                  type="email"
-                  required
-                  value={forgotEmail}
-                  onChange={(e) => setForgotEmail(e.target.value)}
-                  placeholder="exemplo@suaempresa.com.br"
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 focus:bg-white focus:border-rotta-blue focus:outline-none"
-                />
 
-                <div className="flex items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setShowForgotModal(false)}
+                className="rounded-xl p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Barra de Progresso das Etapas */}
+            <div className="grid grid-cols-3 gap-1.5 my-4">
+              <div
+                className={`h-1.5 rounded-full transition-all ${
+                  resetStep >= 1 ? 'bg-rotta-blue' : 'bg-slate-100'
+                }`}
+              />
+              <div
+                className={`h-1.5 rounded-full transition-all ${
+                  resetStep >= 2 ? 'bg-rotta-blue' : 'bg-slate-100'
+                }`}
+              />
+              <div
+                className={`h-1.5 rounded-full transition-all ${
+                  resetStep >= 3 ? 'bg-rotta-blue' : 'bg-slate-100'
+                }`}
+              />
+            </div>
+
+            {/* Alerta de Erro */}
+            {resetError && (
+              <div className="mb-4 rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs font-semibold text-rose-700 flex items-start gap-2 animate-fadeIn">
+                <AlertTriangle size={15} className="text-rose-500 shrink-0 mt-0.5" />
+                <span>{resetError}</span>
+              </div>
+            )}
+
+            {/* ETAPA 1: SOLICITAR CÓDIGO VIA E-MAIL */}
+            {resetStep === 1 && (
+              <form onSubmit={handleRequestResetCode} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                    E-mail Corporativo Cadastrado <span className="text-rose-500">*</span>
+                  </label>
+                  <p className="text-xs text-slate-500 mb-2.5 leading-relaxed">
+                    Informe o e-mail da sua empresa. O sistema verificará se o e-mail está registrado na base da Rotta e gerará um código seguro de 6 dígitos.
+                  </p>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                      <Mail size={16} />
+                    </div>
+                    <input
+                      type="email"
+                      required
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      placeholder="ex: ti@alphalogistica.com.br"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50/70 focus:bg-white pl-9 pr-3 py-2.5 text-xs sm:text-sm text-slate-900 focus:border-rotta-blue focus:outline-none focus:ring-2 focus:ring-rotta-blue/10"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2">
                   <button
                     type="button"
                     onClick={() => setShowForgotModal(false)}
-                    className="rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer"
+                    className="rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="rounded-lg bg-rotta-blue px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 cursor-pointer"
+                    disabled={resetIsLoading}
+                    className="inline-flex items-center gap-2 rounded-xl bg-rotta-blue hover:bg-blue-700 px-4 py-2 text-xs font-bold text-white shadow-xs transition-colors cursor-pointer disabled:opacity-50"
                   >
-                    Enviar Link
+                    {resetIsLoading ? (
+                      <>
+                        <RefreshCw size={13} className="animate-spin" />
+                        <span>Verificando base...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Gerar Código de Segurança</span>
+                        <ArrowRight size={13} />
+                      </>
+                    )}
                   </button>
                 </div>
               </form>
+            )}
+
+            {/* ETAPA 2: VALIDAR CÓDIGO (6 DÍGITOS) */}
+            {resetStep === 2 && (
+              <form onSubmit={handleVerifyResetCode} className="space-y-4">
+                <div>
+                  <div className="rounded-2xl bg-blue-50/80 border border-blue-200/80 p-3.5 mb-3 text-xs text-slate-700 space-y-1.5">
+                    <div className="flex items-center gap-1.5 font-bold text-rotta-navy">
+                      <ShieldCheck size={15} className="text-rotta-blue" />
+                      <span>Código de 6 Dígitos Enviado</span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                      Enviamos o código para: <strong>{resetMaskedEmail}</strong> (validade de 10 minutos).
+                    </p>
+
+                    {/* Simulação segura de entrega para testes */}
+                    <div className="pt-1.5 border-t border-blue-200/60 flex items-center justify-between gap-2">
+                      <span className="text-[11px] text-blue-900 font-semibold font-mono">
+                        Simulação de Caixa de Entrada: [{resetSimulatedCode}]
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setResetCodeInput(resetSimulatedCode)}
+                        className="text-[11px] font-bold text-rotta-blue hover:underline cursor-pointer"
+                      >
+                        Preencher Código
+                      </button>
+                    </div>
+                  </div>
+
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 text-center">
+                    Digite o Código de Verificação
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    required
+                    value={resetCodeInput}
+                    onChange={(e) => setResetCodeInput(e.target.value.replace(/\D/g, ''))}
+                    placeholder="000000"
+                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-center text-xl sm:text-2xl font-mono tracking-widest font-black text-rotta-navy focus:border-rotta-blue focus:outline-none focus:ring-4 focus:ring-rotta-blue/10"
+                    autoFocus
+                  />
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setResetStep(1)
+                      setResetError(null)
+                    }}
+                    className="text-xs font-semibold text-slate-500 hover:text-slate-800 cursor-pointer"
+                  >
+                    ← Alterar E-mail
+                  </button>
+
+                  <button
+                    type="submit"
+                    disabled={resetIsLoading || resetCodeInput.length !== 6}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-rotta-blue hover:bg-blue-700 px-4 py-2 text-xs font-bold text-white shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    {resetIsLoading ? (
+                      <>
+                        <RefreshCw size={13} className="animate-spin" />
+                        <span>Validando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Validar Código</span>
+                        <ArrowRight size={13} />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* ETAPA 3: DEFINIR NOVA SENHA */}
+            {resetStep === 3 && (
+              <form onSubmit={handleCompleteReset} className="space-y-4">
+                <div>
+                  <p className="text-xs text-slate-500 mb-3">
+                    Código validado com sucesso! Crie uma nova senha para o acesso corporativo da sua empresa.
+                  </p>
+
+                  <div className="space-y-3">
+                    {/* Nova Senha */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Nova Senha <span className="text-rose-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                          <KeyRound size={15} />
+                        </div>
+                        <input
+                          type={resetShowPassword ? 'text' : 'password'}
+                          required
+                          value={resetNewPassword}
+                          onChange={(e) => setResetNewPassword(e.target.value)}
+                          placeholder="Mínimo 6 caracteres"
+                          className="w-full rounded-xl border border-slate-200 bg-slate-50/70 focus:bg-white pl-9 pr-9 py-2 text-xs sm:text-sm text-slate-900 focus:border-rotta-blue focus:outline-none focus:ring-2 focus:ring-rotta-blue/10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setResetShowPassword(!resetShowPassword)}
+                          className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                        >
+                          {resetShowPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                        </button>
+                      </div>
+
+                      {/* Medidor de Força */}
+                      {resetNewPassword.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          <div className="flex justify-between text-[11px] font-semibold text-slate-500">
+                            <span>Segurança:</span>
+                            <span className="font-bold">{resetPasswordStrength.label}</span>
+                          </div>
+                          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden flex gap-1">
+                            <div
+                              className={`h-full transition-all duration-300 ${
+                                resetPasswordStrength.score >= 1 ? 'bg-amber-500 w-1/4' : 'w-0'
+                              }`}
+                            />
+                            <div
+                              className={`h-full transition-all duration-300 ${
+                                resetPasswordStrength.score >= 2 ? 'bg-yellow-400 w-1/4' : 'w-0'
+                              }`}
+                            />
+                            <div
+                              className={`h-full transition-all duration-300 ${
+                                resetPasswordStrength.score >= 3 ? 'bg-blue-400 w-1/4' : 'w-0'
+                              }`}
+                            />
+                            <div
+                              className={`h-full transition-all duration-300 ${
+                                resetPasswordStrength.score >= 4 ? 'bg-emerald-500 w-1/4' : 'w-0'
+                              }`}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Confirmar Nova Senha */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        Confirmar Nova Senha <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type={resetShowPassword ? 'text' : 'password'}
+                        required
+                        value={resetConfirmPassword}
+                        onChange={(e) => setResetConfirmPassword(e.target.value)}
+                        placeholder="Repita a nova senha"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50/70 focus:bg-white px-3 py-2 text-xs sm:text-sm text-slate-900 focus:border-rotta-blue focus:outline-none focus:ring-2 focus:ring-rotta-blue/10"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2">
+                  <button
+                    type="submit"
+                    disabled={resetIsLoading}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-xs font-bold text-white shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    {resetIsLoading ? (
+                      <>
+                        <RefreshCw size={13} className="animate-spin" />
+                        <span>Criptografando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check size={14} />
+                        <span>Salvar Nova Senha</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* ETAPA 4: SUCESSO TOTAL & ACESSO */}
+            {resetStep === 4 && (
+              <div className="text-center py-3 space-y-3 animate-fadeIn">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-100">
+                  <CheckCircle2 size={30} />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-base font-extrabold text-slate-900">
+                    Senha Redefinida com Sucesso!
+                  </h4>
+                  <p className="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
+                    Sua nova credencial foi gravada e protegida com SHA-256 e Salt. Os campos de login já foram atualizados.
+                  </p>
+                </div>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowForgotModal(false)
+                      setSuccessMessage('Senha atualizada! Clique em "Entrar no Portal do Cliente" para acessar.')
+                    }}
+                    className="inline-flex items-center justify-center gap-2 w-full rounded-xl bg-rotta-blue hover:bg-blue-700 py-2.5 text-xs font-bold text-white shadow-xs transition-colors cursor-pointer"
+                  >
+                    <span>Prosseguir para o Login</span>
+                    <ArrowRight size={14} />
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>
