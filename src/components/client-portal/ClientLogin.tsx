@@ -22,6 +22,9 @@ import {
   MapPin,
   Check,
   X,
+  MessageSquare,
+  Copy,
+  Info,
 } from 'lucide-react'
 import {
   getAllClientCompanies,
@@ -30,6 +33,10 @@ import {
 } from '../../data/mockClientData'
 import type { ClientCompany } from '../../types/clientPortal'
 import { BrandMark } from '../BrandMark'
+import {
+  sendPasswordResetEmail,
+  isEmailServiceConfigured,
+} from '../../services/emailService'
 import {
   authenticateWithSecurity,
   evaluatePasswordStrength,
@@ -96,6 +103,26 @@ export function ClientLogin({
   const [resetShowPassword, setResetShowPassword] = useState(false)
   const [resetError, setResetError] = useState<string | null>(null)
   const [resetIsLoading, setResetIsLoading] = useState(false)
+  const [resetEmailStatus, setResetEmailStatus] = useState<{
+    sent: boolean
+    isConfigured: boolean
+    message: string
+  }>({
+    sent: false,
+    isConfigured: isEmailServiceConfigured(),
+    message: '',
+  })
+  const [resendCooldown, setResendCooldown] = useState<number>(0)
+  const [copiedResetCode, setCopiedResetCode] = useState(false)
+
+  // Temporizador para reenvio de código (cooldown de 60 segundos)
+  useEffect(() => {
+    if (resendCooldown <= 0) return
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [resendCooldown])
 
   // Avaliação de força de senha
   const currentPasswordForStrength = authMode === 'login' ? password : regPassword
@@ -334,24 +361,48 @@ export function ClientLogin({
     setShowForgotModal(true)
   }
 
-  const handleRequestResetCode = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleRequestResetCode = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
     setResetError(null)
     setResetIsLoading(true)
 
-    setTimeout(() => {
-      const res = requestPasswordReset(resetEmail)
+    const res = requestPasswordReset(resetEmail)
+    if (!res.success) {
       setResetIsLoading(false)
-      if (!res.success) {
-        setResetError(res.error || 'Erro ao localizar conta.')
-        return
-      }
+      setResetError(res.error || 'Erro ao localizar conta.')
+      return
+    }
 
-      setResetToken(res.token || '')
-      setResetMaskedEmail(res.maskedEmail || resetEmail)
-      setResetSimulatedCode(res.code || '')
+    setResetToken(res.token || '')
+    setResetMaskedEmail(res.maskedEmail || resetEmail)
+    setResetSimulatedCode(res.code || '')
+
+    // Disparo real de e-mail através do emailService
+    try {
+      const emailRes = await sendPasswordResetEmail({
+        toEmail: resetEmail.trim(),
+        userName: res.userName || 'Cliente Rotta Tecnologia',
+        code: res.code || '',
+        expiresMinutes: 10,
+      })
+
+      setResetEmailStatus({
+        sent: emailRes.success,
+        isConfigured: emailRes.isConfigured,
+        message: emailRes.message,
+      })
+    } catch (err: any) {
+      console.error('Falha no envio do e-mail:', err)
+      setResetEmailStatus({
+        sent: false,
+        isConfigured: false,
+        message: 'Não foi possível contatar o servidor de correio.',
+      })
+    } finally {
+      setResetIsLoading(false)
+      setResendCooldown(60)
       setResetStep(2)
-    }, 400)
+    }
   }
 
   const handleVerifyResetCode = (e: React.FormEvent) => {
@@ -1086,29 +1137,97 @@ export function ClientLogin({
             {resetStep === 2 && (
               <form onSubmit={handleVerifyResetCode} className="space-y-4">
                 <div>
-                  <div className="rounded-2xl bg-blue-50/80 border border-blue-200/80 p-3.5 mb-3 text-xs text-slate-700 space-y-1.5">
-                    <div className="flex items-center gap-1.5 font-bold text-rotta-navy">
-                      <ShieldCheck size={15} className="text-rotta-blue" />
-                      <span>Código de 6 Dígitos Enviado</span>
+                  {resetEmailStatus.isConfigured && resetEmailStatus.sent ? (
+                    // Caso 1: E-mail Real foi disparado com sucesso!
+                    <div className="rounded-2xl bg-emerald-50/90 border border-emerald-200/90 p-4 mb-3 text-xs text-emerald-900 space-y-2">
+                      <div className="flex items-center gap-1.5 font-bold text-emerald-800">
+                        <CheckCircle2 size={16} className="text-emerald-600" />
+                        <span>E-mail com Código de Segurança Enviado!</span>
+                      </div>
+                      <p className="text-[11px] text-emerald-700 leading-relaxed">
+                        Enviamos a mensagem com o código de 6 dígitos para o e-mail: <strong>{resetMaskedEmail}</strong>.
+                      </p>
+                      <div className="p-2.5 rounded-xl bg-white/80 border border-emerald-200 text-[11px] text-emerald-800">
+                        <span>⏳ O código é válido por <strong>10 minutos</strong>. Verifique sua Caixa de Entrada e Pasta de Spam.</span>
+                      </div>
                     </div>
-                    <p className="text-[11px] text-slate-600 leading-relaxed">
-                      Enviamos o código para: <strong>{resetMaskedEmail}</strong> (validade de 10 minutos).
-                    </p>
+                  ) : (
+                    // Caso 2: Chaves de e-mail ainda não configuradas no .env (Modo de Demonstração / Setup)
+                    <div className="rounded-2xl bg-blue-50/90 border border-blue-200/90 p-4 mb-3 text-xs text-slate-800 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 font-bold text-rotta-navy">
+                          <Mail size={15} className="text-rotta-blue" />
+                          <span>Código de Redefinição Gerado</span>
+                        </div>
+                        <span className="text-[10px] bg-blue-100 text-rotta-blue font-bold px-2 py-0.5 rounded-full">
+                          Validade: 10 min
+                        </span>
+                      </div>
 
-                    {/* Simulação segura de entrega para testes */}
-                    <div className="pt-1.5 border-t border-blue-200/60 flex items-center justify-between gap-2">
-                      <span className="text-[11px] text-blue-900 font-semibold font-mono">
-                        Simulação de Caixa de Entrada: [{resetSimulatedCode}]
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setResetCodeInput(resetSimulatedCode)}
-                        className="text-[11px] font-bold text-rotta-blue hover:underline cursor-pointer"
-                      >
-                        Preencher Código
-                      </button>
+                      <p className="text-[11px] text-slate-600 leading-relaxed">
+                        Destinatário: <strong>{resetMaskedEmail}</strong>.
+                      </p>
+
+                      {/* Caixa de Código para testes imediatos */}
+                      <div className="p-3 rounded-xl bg-white border border-blue-200 shadow-2xs space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                            Código Temporário de Segurança:
+                          </span>
+                          <span className="text-base font-black font-mono text-rotta-blue tracking-widest">
+                            {resetSimulatedCode}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setResetCodeInput(resetSimulatedCode)
+                            }}
+                            className="flex-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-rotta-blue py-1.5 px-2 text-[11px] font-bold transition-colors cursor-pointer text-center"
+                          >
+                            Preencher Automaticamente
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(resetSimulatedCode)
+                              setCopiedResetCode(true)
+                              setTimeout(() => setCopiedResetCode(false), 2000)
+                            }}
+                            className="rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 py-1.5 px-2.5 text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1"
+                          >
+                            {copiedResetCode ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
+                            <span>{copiedResetCode ? 'Copiado!' : 'Copiar'}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Opção via WhatsApp caso o cliente precise de atendimento direto */}
+                      <div className="pt-1 flex items-center justify-between text-[11px]">
+                        <span className="text-slate-500">Precisa de suporte agora?</span>
+                        <a
+                          href={`https://api.whatsapp.com/send?phone=5546988037656&text=${encodeURIComponent(
+                            `Olá Douglas Rotta, estou no Portal da Rotta Tecnologia e solicitei a redefinição de senha para a empresa cadastrada com o e-mail: ${resetEmail}. Meu código gerado é ${resetSimulatedCode}.`
+                          )}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 text-emerald-700 font-bold hover:underline"
+                        >
+                          <MessageSquare size={12} />
+                          <span>Solicitar via WhatsApp</span>
+                        </a>
+                      </div>
+
+                      {/* Dica para ativação do envio de e-mails reais */}
+                      <div className="p-2 rounded-lg bg-amber-50/80 border border-amber-200/60 text-[10px] text-amber-900 leading-tight flex items-start gap-1.5">
+                        <Info size={13} className="text-amber-700 shrink-0 mt-0.5" />
+                        <span>
+                          <strong>Para enviar e-mails reais na caixa de entrada:</strong> adicione as 3 chaves gratuitas do <strong>EmailJS</strong> no arquivo <code>.env</code>.
+                        </span>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <label className="block text-xs font-bold text-slate-700 mb-1.5 text-center">
                     Digite o Código de Verificação
@@ -1123,6 +1242,24 @@ export function ClientLogin({
                     className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-center text-xl sm:text-2xl font-mono tracking-widest font-black text-rotta-navy focus:border-rotta-blue focus:outline-none focus:ring-4 focus:ring-rotta-blue/10"
                     autoFocus
                   />
+
+                  {/* Reenviar Código */}
+                  <div className="mt-2 text-center">
+                    {resendCooldown > 0 ? (
+                      <span className="text-[11px] text-slate-400 font-medium">
+                        Reenviar código em <strong>{resendCooldown}s</strong>
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={resetIsLoading}
+                        onClick={() => handleRequestResetCode()}
+                        className="text-[11px] font-bold text-rotta-blue hover:underline cursor-pointer disabled:opacity-50"
+                      >
+                        Não recebeu? Reenviar código
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-2">
