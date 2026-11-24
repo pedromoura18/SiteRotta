@@ -35,6 +35,7 @@ import type { ClientCompany } from '../../types/clientPortal'
 import { BrandMark } from '../BrandMark'
 import {
   sendPasswordResetEmail,
+  sendFirstAccessEmail,
   isEmailServiceConfigured,
 } from '../../services/emailService'
 import {
@@ -46,6 +47,10 @@ import {
   requestPasswordReset,
   verifyPasswordResetCode,
   completePasswordReset,
+  checkFirstAccessEligibility,
+  requestFirstAccessCode,
+  verifyFirstAccessCode,
+  completeFirstAccessSetup,
 } from '../../utils/cryptoAuth'
 
 interface ClientLoginProps {
@@ -114,6 +119,41 @@ export function ClientLogin({
   })
   const [resendCooldown, setResendCooldown] = useState<number>(0)
   const [copiedResetCode, setCopiedResetCode] = useState(false)
+
+  // Estados do Modal de Primeiro Acesso (Ativação de Conta por CNPJ/CPF)
+  const [showFirstAccessModal, setShowFirstAccessModal] = useState(false)
+  const [faStep, setFaStep] = useState<1 | 2 | 3 | 4>(1)
+  const [faDocumentInput, setFaDocumentInput] = useState('')
+  const [faFoundCompany, setFaFoundCompany] = useState<ClientCompany | null>(null)
+  const [faMaskedEmail, setFaMaskedEmail] = useState('')
+  const [faToken, setFaToken] = useState('')
+  const [faSimulatedCode, setFaSimulatedCode] = useState('')
+  const [faCodeInput, setFaCodeInput] = useState('')
+  const [faPassword, setFaPassword] = useState('')
+  const [faConfirmPassword, setFaConfirmPassword] = useState('')
+  const [faShowPassword, setFaShowPassword] = useState(false)
+  const [faError, setFaError] = useState<string | null>(null)
+  const [faIsLoading, setFaIsLoading] = useState(false)
+  const [faCooldown, setFaCooldown] = useState<number>(0)
+  const [faCopiedCode, setFaCopiedCode] = useState(false)
+  const [faEmailStatus, setFaEmailStatus] = useState<{
+    sent: boolean
+    isConfigured: boolean
+    message: string
+  }>({
+    sent: false,
+    isConfigured: isEmailServiceConfigured(),
+    message: '',
+  })
+
+  // Temporizador para reenvio de código de primeiro acesso
+  useEffect(() => {
+    if (faCooldown <= 0) return
+    const timer = setInterval(() => {
+      setFaCooldown((prev) => (prev > 0 ? prev - 1 : 0))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [faCooldown])
 
   // Temporizador para reenvio de código (cooldown de 60 segundos)
   useEffect(() => {
@@ -213,7 +253,15 @@ export function ClientLogin({
       )
 
       if (!authResult.success) {
-        setError(authResult.error || 'Credenciais inválidas.')
+        // Verifica se é uma empresa contratante que ainda não criou senha
+        const eligibility = checkFirstAccessEligibility(identifier)
+        if (eligibility.success && !eligibility.alreadyHasPassword && eligibility.company) {
+          setError(
+            `Identificamos o contrato da empresa ${eligibility.company.name}! Este é o seu primeiro acesso ao portal. Clique em "Ativar Conta com CNPJ/CPF" abaixo para definir sua senha.`
+          )
+        } else {
+          setError(authResult.error || 'Credenciais inválidas.')
+        }
         const status = checkBruteForceLockout()
         if (status.isLocked) {
           setLockoutRemaining(status.remainingSeconds)
@@ -453,6 +501,161 @@ export function ClientLogin({
     setResetStep(4)
     setIdentifier(resetEmail)
     setPassword(resetNewPassword)
+  }
+
+  const faPasswordStrength = evaluatePasswordStrength(faPassword)
+
+  // Handlers do Modal de Primeiro Acesso (Ativação por CNPJ/CPF)
+  const handleOpenFirstAccessModal = () => {
+    setFaStep(1)
+    setFaDocumentInput(identifier || '')
+    setFaFoundCompany(null)
+    setFaMaskedEmail('')
+    setFaToken('')
+    setFaSimulatedCode('')
+    setFaCodeInput('')
+    setFaPassword('')
+    setFaConfirmPassword('')
+    setFaError(null)
+    setShowFirstAccessModal(true)
+  }
+
+  const handleFaCheckDocument = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setFaError(null)
+    setFaIsLoading(true)
+
+    const check = checkFirstAccessEligibility(faDocumentInput)
+    if (!check.success || !check.company) {
+      setFaIsLoading(false)
+      setFaError(check.error || 'Contrato ou CNPJ/CPF não encontrado.')
+      return
+    }
+
+    setFaFoundCompany(check.company)
+    setFaMaskedEmail(check.maskedEmail || check.company.email)
+
+    // Solicita o código de 6 dígitos
+    const codeReq = requestFirstAccessCode(check.company.id)
+    if (!codeReq.success || !codeReq.token || !codeReq.code) {
+      setFaIsLoading(false)
+      setFaError(codeReq.error || 'Erro ao gerar código de segurança.')
+      return
+    }
+
+    setFaToken(codeReq.token)
+    setFaSimulatedCode(codeReq.code)
+
+    // Dispara e-mail real via EmailJS
+    try {
+      const emailRes = await sendFirstAccessEmail({
+        toEmail: check.company.email,
+        userName: check.company.contactPerson || check.company.name,
+        companyName: check.company.name,
+        code: codeReq.code,
+        expiresMinutes: 15,
+      })
+
+      setFaEmailStatus({
+        sent: emailRes.success,
+        isConfigured: emailRes.isConfigured,
+        message: emailRes.message,
+      })
+    } catch (err: any) {
+      console.warn('Falha no envio de e-mail de primeiro acesso:', err)
+      setFaEmailStatus({
+        sent: false,
+        isConfigured: false,
+        message: 'Serviço de e-mail não disponível no momento.',
+      })
+    } finally {
+      setFaIsLoading(false)
+      setFaCooldown(60)
+      setFaStep(2)
+    }
+  }
+
+  const handleFaResendCode = async () => {
+    if (faCooldown > 0 || !faFoundCompany) return
+    setFaIsLoading(true)
+    setFaError(null)
+
+    const codeReq = requestFirstAccessCode(faFoundCompany.id)
+    if (!codeReq.success || !codeReq.token || !codeReq.code) {
+      setFaIsLoading(false)
+      setFaError(codeReq.error || 'Erro ao reenviar código.')
+      return
+    }
+
+    setFaToken(codeReq.token)
+    setFaSimulatedCode(codeReq.code)
+
+    try {
+      const emailRes = await sendFirstAccessEmail({
+        toEmail: faFoundCompany.email,
+        userName: faFoundCompany.contactPerson || faFoundCompany.name,
+        companyName: faFoundCompany.name,
+        code: codeReq.code,
+        expiresMinutes: 15,
+      })
+
+      setFaEmailStatus({
+        sent: emailRes.success,
+        isConfigured: emailRes.isConfigured,
+        message: emailRes.message,
+      })
+    } finally {
+      setFaIsLoading(false)
+      setFaCooldown(60)
+    }
+  }
+
+  const handleFaVerifyCode = (e: React.FormEvent) => {
+    e.preventDefault()
+    setFaError(null)
+
+    if (!faCodeInput.trim() || faCodeInput.trim().length !== 6) {
+      setFaError('Por favor, informe o código de 6 dígitos.')
+      return
+    }
+
+    const res = verifyFirstAccessCode(faToken, faCodeInput.trim())
+    if (!res.success) {
+      setFaError(res.error || 'Código incorreto.')
+      return
+    }
+
+    setFaStep(3)
+  }
+
+  const handleFaComplete = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setFaError(null)
+
+    if (faPassword.length < 6) {
+      setFaError('A senha deve ter no mínimo 6 caracteres.')
+      return
+    }
+
+    if (faPassword !== faConfirmPassword) {
+      setFaError('As senhas digitadas não coincidem.')
+      return
+    }
+
+    setFaIsLoading(true)
+    const res = await completeFirstAccessSetup(faToken, faPassword)
+    setFaIsLoading(false)
+
+    if (!res.success || !res.company) {
+      setFaError(res.error || 'Falha ao ativar a conta.')
+      return
+    }
+
+    setFaStep(4)
+    setTimeout(() => {
+      setShowFirstAccessModal(false)
+      handleClientLogin(res.company!, res.sessionToken)
+    }, 1500)
   }
 
   return (
@@ -699,6 +902,32 @@ export function ClientLogin({
                     </>
                   )}
                 </button>
+
+                {/* 🌟 BANNER DE PRIMEIRO ACESSO / ATIVAÇÃO DE CONTA */}
+                <div className="pt-2">
+                  <div className="rounded-2xl bg-gradient-to-r from-amber-50/90 to-orange-50/70 border border-amber-200/90 p-4 text-xs space-y-2 shadow-2xs">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0 font-bold">
+                        <Sparkles size={14} />
+                      </span>
+                      <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
+                        Primeiro Acesso ao Portal?
+                      </span>
+                    </div>
+                    <p className="text-slate-600 leading-relaxed text-[11px] sm:text-xs">
+                      Se sua empresa já possui contrato ou impressoras alugadas com a Rotta Tecnologia, ative seu acesso e crie sua senha usando apenas o <strong>CNPJ ou CPF</strong> da empresa.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleOpenFirstAccessModal}
+                      className="inline-flex items-center gap-1.5 font-extrabold text-rotta-blue hover:text-rotta-navy hover:underline cursor-pointer pt-0.5"
+                    >
+                      <KeyRound size={13} />
+                      <span>Ativar Conta com CNPJ/CPF</span>
+                      <ArrowRight size={13} />
+                    </button>
+                  </div>
+                </div>
               </form>
             ) : (
               /* =========================================
@@ -952,6 +1181,32 @@ export function ClientLogin({
                     </>
                   )}
                 </button>
+
+                {/* 🌟 BANNER DE PRIMEIRO ACESSO / ATIVAÇÃO DE CONTA */}
+                <div className="pt-2">
+                  <div className="rounded-2xl bg-gradient-to-r from-amber-50/90 to-orange-50/70 border border-amber-200/90 p-4 text-xs space-y-2 shadow-2xs">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-700 flex items-center justify-center shrink-0 font-bold">
+                        <Sparkles size={14} />
+                      </span>
+                      <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
+                        Primeiro Acesso ao Portal?
+                      </span>
+                    </div>
+                    <p className="text-slate-600 leading-relaxed text-[11px] sm:text-xs">
+                      Se sua empresa já possui contrato ou impressoras alugadas com a Rotta Tecnologia, ative seu acesso e crie sua senha usando apenas o <strong>CNPJ ou CPF</strong> da empresa.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleOpenFirstAccessModal}
+                      className="inline-flex items-center gap-1.5 font-extrabold text-rotta-blue hover:text-rotta-navy hover:underline cursor-pointer pt-0.5"
+                    >
+                      <KeyRound size={13} />
+                      <span>Ativar Conta com CNPJ/CPF</span>
+                      <ArrowRight size={13} />
+                    </button>
+                  </div>
+                </div>
               </form>
             )}
 
@@ -1428,6 +1683,356 @@ export function ClientLogin({
                     <span>Prosseguir para o Login</span>
                     <ArrowRight size={14} />
                   </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── 🌟 NOVO MODAL DE PRIMEIRO ACESSO / ATIVAÇÃO DE CONTA POR CNPJ/CPF ── */}
+      {showFirstAccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-fadeIn">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-slate-200 relative overflow-hidden">
+            <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-amber-500 via-orange-500 to-emerald-500" />
+
+            {/* Cabeçalho do Modal */}
+            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200/80">
+                  <Sparkles size={18} />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900 leading-snug">
+                    Primeiro Acesso ao Portal
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Ative a conta da sua empresa usando o CNPJ ou CPF
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowFirstAccessModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X size={15} />
+              </button>
+            </div>
+
+            {/* Indicador de Passos */}
+            <div className="flex items-center justify-center gap-2 pt-4 pb-1">
+              {[
+                { step: 1, label: 'Contrato' },
+                { step: 2, label: 'Validação' },
+                { step: 3, label: 'Criar Senha' },
+              ].map((s) => (
+                <div key={s.step} className="flex items-center gap-1.5 text-xs">
+                  <span
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-all ${
+                      faStep === s.step
+                        ? 'bg-amber-500 text-white shadow-xs'
+                        : faStep > s.step
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-slate-100 text-slate-400'
+                    }`}
+                  >
+                    {faStep > s.step ? '✓' : s.step}
+                  </span>
+                  <span
+                    className={`hidden sm:inline text-[11px] font-semibold ${
+                      faStep === s.step ? 'text-slate-900' : 'text-slate-400'
+                    }`}
+                  >
+                    {s.label}
+                  </span>
+                  {s.step < 3 && <span className="text-slate-300 mx-1">›</span>}
+                </div>
+              ))}
+            </div>
+
+            {/* Mensagem de Erro do Modal */}
+            {faError && (
+              <div className="mt-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-start gap-2 animate-fadeIn">
+                <AlertTriangle size={15} className="shrink-0 mt-0.5 text-rose-500" />
+                <span className="leading-snug">{faError}</span>
+              </div>
+            )}
+
+            {/* ETAPA 1: LOCALIZAR CONTRATO POR CNPJ/CPF */}
+            {faStep === 1 && (
+              <form onSubmit={handleFaCheckDocument} className="space-y-4 pt-3 animate-fadeIn">
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Digite o <strong>CNPJ ou CPF</strong> da empresa que possui contrato ou impressoras alugadas com a Rotta Tecnologia.
+                </p>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    CNPJ ou CPF da Empresa
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                      <Building size={15} />
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      value={faDocumentInput}
+                      onChange={(e) => setFaDocumentInput(e.target.value)}
+                      placeholder="00.000.000/0001-00 ou e-mail"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-4 py-2.5 text-xs text-slate-900 focus:bg-white focus:border-amber-500 focus:outline-none font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-500 space-y-1">
+                  <p className="font-bold text-slate-700">Dica para testes imediatos:</p>
+                  <p>Você pode testar usando qualquer empresa modelo:</p>
+                  <p>• Alpha Express: <code className="font-mono text-rotta-blue font-bold">28.914.832/0001-45</code></p>
+                  <p>• Beta Alimentos: <code className="font-mono text-rotta-blue font-bold">08.412.983/0001-12</code></p>
+                  <p>• Hospital São Lucas: <code className="font-mono text-rotta-blue font-bold">14.281.049/0001-77</code></p>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowFirstAccessModal(false)}
+                    className="rounded-xl px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={faIsLoading}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                  >
+                    {faIsLoading ? (
+                      <>
+                        <RefreshCw size={13} className="animate-spin" />
+                        <span>Buscando Contrato...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Localizar Contrato</span>
+                        <ArrowRight size={13} />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* ETAPA 2: VALIDAR CÓDIGO DE 6 DÍGITOS */}
+            {faStep === 2 && faFoundCompany && (
+              <form onSubmit={handleFaVerifyCode} className="space-y-3.5 pt-3 animate-fadeIn">
+                <div className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200 text-xs text-amber-950 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-extrabold text-slate-900 text-xs">
+                      🏢 {faFoundCompany.name}
+                    </span>
+                    <span className="text-[10px] font-mono bg-white/80 px-2 py-0.5 rounded border border-amber-300 font-bold">
+                      {faFoundCompany.contractNumber}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-amber-800">
+                    Contrato ativo localizado! Enviamos um código de segurança de 6 dígitos para o e-mail cadastrado:
+                  </p>
+                  <p className="font-mono font-bold text-slate-900 bg-white/90 px-2.5 py-1 rounded-lg border border-amber-200 inline-block">
+                    {faMaskedEmail}
+                  </p>
+                  <p className="text-[11px] text-amber-900 pt-0.5">
+                    {faEmailStatus.sent
+                      ? '✓ E-mail enviado via servidor seguro.'
+                      : 'Verifique a caixa de entrada da sua empresa.'}
+                  </p>
+                </div>
+
+                {/* Bloco de Código de Teste (para homologação ágil) */}
+                {faSimulatedCode && (
+                  <div className="p-3 rounded-xl bg-slate-900 text-white text-xs space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-extrabold text-[11px] uppercase tracking-wider text-amber-400">
+                        Código de Ativação:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFaCodeInput(faSimulatedCode)
+                          setFaCopiedCode(true)
+                          setTimeout(() => setFaCopiedCode(false), 2000)
+                        }}
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-900 bg-amber-400 hover:bg-amber-300 px-2 py-0.5 rounded cursor-pointer transition-colors"
+                      >
+                        {faCopiedCode ? <Check size={12} className="text-emerald-800" /> : <Copy size={12} />}
+                        <span>{faCopiedCode ? 'Inserido!' : 'Auto-Preencher'}</span>
+                      </button>
+                    </div>
+                    <div className="font-mono text-xl font-black text-center tracking-widest text-amber-300 py-1 bg-slate-950 rounded-lg border border-slate-700">
+                      {faSimulatedCode}
+                    </div>
+                    <p className="text-[10px] text-slate-400 text-center">
+                      (Válido por 15 minutos • Proteção anti-ataques)
+                    </p>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Digite o Código de 6 Dígitos
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    maxLength={6}
+                    value={faCodeInput}
+                    onChange={(e) => setFaCodeInput(e.target.value.replace(/\D/g, ''))}
+                    placeholder="000000"
+                    className="w-full text-center tracking-widest font-mono text-xl font-bold rounded-xl border border-slate-200 bg-slate-50 py-2.5 text-slate-900 focus:bg-white focus:border-amber-500 focus:outline-none"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between pt-1 text-xs">
+                  <button
+                    type="button"
+                    disabled={faCooldown > 0 || faIsLoading}
+                    onClick={handleFaResendCode}
+                    className="font-semibold text-amber-700 hover:underline cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {faCooldown > 0
+                      ? `Reenviar código em ${faCooldown}s`
+                      : 'Reenviar código'}
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 text-xs font-bold transition-all shadow-xs cursor-pointer"
+                  >
+                    <span>Validar Código</span>
+                    <ArrowRight size={13} />
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* ETAPA 3: CRIAÇÃO DA NOVA SENHA */}
+            {faStep === 3 && (
+              <form onSubmit={handleFaComplete} className="space-y-3.5 pt-3 animate-fadeIn">
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Identidade verificada! Crie abaixo a senha de acesso da sua empresa ao Portal da Rotta Tecnologia.
+                </p>
+
+                {/* Campo Nova Senha */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Criar Senha de Acesso
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={faShowPassword ? 'text' : 'password'}
+                      required
+                      value={faPassword}
+                      onChange={(e) => setFaPassword(e.target.value)}
+                      placeholder="Mínimo 6 caracteres"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-3.5 pr-10 py-2 text-xs text-slate-900 focus:bg-white focus:border-amber-500 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFaShowPassword(!faShowPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      {faShowPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+
+                  {/* Medidor de Força */}
+                  {faPassword.length > 0 && (
+                    <div className="mt-1.5 space-y-1">
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-slate-500">Força da Senha:</span>
+                        <span className="font-bold text-slate-700">
+                          {faPasswordStrength.label}
+                        </span>
+                      </div>
+                      <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden flex gap-0.5">
+                        <div
+                          className={`h-full transition-all duration-300 ${
+                            faPasswordStrength.score >= 1 ? 'bg-amber-500 w-1/4' : 'w-0'
+                          }`}
+                        />
+                        <div
+                          className={`h-full transition-all duration-300 ${
+                            faPasswordStrength.score >= 2 ? 'bg-yellow-400 w-1/4' : 'w-0'
+                          }`}
+                        />
+                        <div
+                          className={`h-full transition-all duration-300 ${
+                            faPasswordStrength.score >= 3 ? 'bg-blue-400 w-1/4' : 'w-0'
+                          }`}
+                        />
+                        <div
+                          className={`h-full transition-all duration-300 ${
+                            faPasswordStrength.score >= 4 ? 'bg-emerald-500 w-1/4' : 'w-0'
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Campo Confirmar Senha */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Confirmar Senha
+                  </label>
+                  <input
+                    type={faShowPassword ? 'text' : 'password'}
+                    required
+                    value={faConfirmPassword}
+                    onChange={(e) => setFaConfirmPassword(e.target.value)}
+                    placeholder="Repita a senha criada"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-900 focus:bg-white focus:border-amber-500 focus:outline-none"
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={faIsLoading}
+                    className="inline-flex items-center justify-center gap-1.5 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                  >
+                    {faIsLoading ? (
+                      <>
+                        <RefreshCw size={13} className="animate-spin" />
+                        <span>Criptografando & Ativando Acesso...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check size={14} />
+                        <span>Ativar Conta e Entrar no Portal</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* ETAPA 4: SUCESSO TOTAL & ENTRADA IMEDIATA */}
+            {faStep === 4 && (
+              <div className="text-center py-4 space-y-3 animate-fadeIn">
+                <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-100">
+                  <CheckCircle2 size={36} />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-base font-extrabold text-slate-900">
+                    Conta Ativada com Sucesso!
+                  </h4>
+                  <p className="text-xs text-slate-600 max-w-xs mx-auto leading-relaxed">
+                    Sua senha foi registrada com segurança. Redirecionando para o painel com suas impressoras e contratos...
+                  </p>
+                </div>
+                <div className="pt-2 flex items-center justify-center gap-2 text-xs text-rotta-blue font-bold">
+                  <RefreshCw size={14} className="animate-spin" />
+                  <span>Carregando Portal do Cliente...</span>
                 </div>
               </div>
             )}

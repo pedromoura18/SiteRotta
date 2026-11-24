@@ -4,6 +4,9 @@
  * controle anti-brute force com bloqueio temporário e verificação de integridade.
  */
 
+import type { ClientCompany } from '../types/clientPortal'
+import { getAllClientCompanies } from '../data/mockClientData'
+
 // Chave simulada para assinatura HMAC de tokens de sessão
 const HMAC_SIGNATURE_SECRET = 'rotta_sec_prod_key_2026_aes256_telemetry'
 
@@ -652,6 +655,249 @@ export async function completePasswordReset(
     return { success: true }
   } catch {
     return { success: false, error: 'Não foi possível redefinir a senha. Tente novamente.' }
+  }
+}
+
+/**
+ * =========================================================================
+ * FLUXO DE PRIMEIRO ACESSO / ATIVAÇÃO DE CONTA (CNPJ OU CPF DO CONTRATO)
+ * =========================================================================
+ * Permite que um cliente já existente na base de contratos crie sua primeira
+ * senha de acesso com validação segura de titularidade (E-mail / Código).
+ * =========================================================================
+ */
+const FIRST_ACCESS_STORAGE_KEY = 'rotta_first_access_sessions_v1'
+
+export interface FirstAccessSession {
+  companyId: string
+  companyName: string
+  document: string
+  email: string
+  code: string
+  token: string
+  expiresAt: number
+  attemptsRemaining: number
+  isVerified?: boolean
+}
+
+/**
+ * Verifica se um CNPJ, CPF ou e-mail pertence a um contrato ativo da Rotta
+ */
+export function checkFirstAccessEligibility(docOrEmailInput: string): {
+  success: boolean
+  error?: string
+  company?: ClientCompany
+  maskedEmail?: string
+  alreadyHasPassword?: boolean
+} {
+  const cleanInput = docOrEmailInput.trim().toLowerCase()
+  const cleanDoc = cleanInput.replace(/\D/g, '')
+
+  if (!cleanInput) {
+    return { success: false, error: 'Por favor, informe o CNPJ, CPF ou e-mail cadastrado no contrato.' }
+  }
+
+  const allCompanies = getAllClientCompanies()
+  const foundCompany = allCompanies.find((c) => {
+    const compCleanCnpj = c.cnpj.replace(/\D/g, '')
+    if (cleanDoc && cleanDoc.length >= 11 && compCleanCnpj === cleanDoc) return true
+    if (c.email.toLowerCase() === cleanInput) return true
+    if (c.contractNumber.toLowerCase() === cleanInput) return true
+    return false
+  })
+
+  if (!foundCompany) {
+    return {
+      success: false,
+      error: 'Contrato ou CNPJ/CPF não encontrado na nossa base. Verifique os números digitados ou entre em contato com o suporte da Rotta Tecnologia.',
+    }
+  }
+
+  // Verifica se a empresa já possui usuário registrado com senha
+  const allUsers = getRegisteredUsers()
+  const cleanCompCnpj = foundCompany.cnpj.replace(/\D/g, '')
+  const existingUser = allUsers.find(
+    (u) =>
+      u.companyId === foundCompany.id ||
+      u.identifier.toLowerCase() === foundCompany.email.toLowerCase() ||
+      u.identifier.replace(/\D/g, '') === cleanCompCnpj
+  )
+
+  const [userPart, domainPart] = foundCompany.email.split('@')
+  const maskedUser = userPart.length <= 2 ? userPart + '***' : userPart.slice(0, 2) + '***'
+  const maskedEmail = `${maskedUser}@${domainPart || 'empresa.com.br'}`
+
+  return {
+    success: true,
+    company: foundCompany,
+    maskedEmail,
+    alreadyHasPassword: !!existingUser,
+  }
+}
+
+/**
+ * Inicia a solicitação de ativação gerando o código de segurança de 6 dígitos
+ */
+export function requestFirstAccessCode(companyId: string): {
+  success: boolean
+  error?: string
+  token?: string
+  code?: string
+  company?: ClientCompany
+  email?: string
+  maskedEmail?: string
+} {
+  const allCompanies = getAllClientCompanies()
+  const company = allCompanies.find((c) => c.id === companyId)
+
+  if (!company) {
+    return { success: false, error: 'Empresa contratante não encontrada na base.' }
+  }
+
+  const code = Math.floor(100000 + Math.random() * 900000).toString()
+  const token = `fa-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`
+  const expiresAt = Date.now() + 15 * 60 * 1000 // 15 minutos de validade
+
+  const session: FirstAccessSession = {
+    companyId: company.id,
+    companyName: company.name,
+    document: company.cnpj,
+    email: company.email,
+    code,
+    token,
+    expiresAt,
+    attemptsRemaining: 4,
+    isVerified: false,
+  }
+
+  try {
+    localStorage.setItem(FIRST_ACCESS_STORAGE_KEY, JSON.stringify(session))
+  } catch (e) {
+    console.warn('Erro ao salvar sessão de primeiro acesso:', e)
+  }
+
+  const [userPart, domainPart] = company.email.split('@')
+  const maskedUser = userPart.length <= 2 ? userPart + '***' : userPart.slice(0, 2) + '***'
+  const maskedEmail = `${maskedUser}@${domainPart || 'empresa.com.br'}`
+
+  return {
+    success: true,
+    token,
+    code,
+    company,
+    email: company.email,
+    maskedEmail,
+  }
+}
+
+/**
+ * Valida o código de ativação de 6 dígitos recebido pelo cliente
+ */
+export function verifyFirstAccessCode(
+  token: string,
+  codeInput: string
+): { success: boolean; error?: string } {
+  try {
+    const raw = localStorage.getItem(FIRST_ACCESS_STORAGE_KEY)
+    if (!raw) {
+      return { success: false, error: 'Sessão de ativação expirada ou não encontrada. Solicite um novo código.' }
+    }
+
+    const session: FirstAccessSession = JSON.parse(raw)
+    if (session.token !== token) {
+      return { success: false, error: 'Token de ativação inválido.' }
+    }
+
+    if (Date.now() > session.expiresAt) {
+      localStorage.removeItem(FIRST_ACCESS_STORAGE_KEY)
+      return { success: false, error: 'O código de ativação expirou (validade de 15 min). Solicite novamente.' }
+    }
+
+    if (session.attemptsRemaining <= 0) {
+      localStorage.removeItem(FIRST_ACCESS_STORAGE_KEY)
+      return { success: false, error: 'Número máximo de tentativas excedido. Solicite um novo código por segurança.' }
+    }
+
+    if (session.code !== codeInput.trim()) {
+      session.attemptsRemaining -= 1
+      localStorage.setItem(FIRST_ACCESS_STORAGE_KEY, JSON.stringify(session))
+      return {
+        success: false,
+        error: `Código de verificação incorreto. Você ainda tem ${session.attemptsRemaining} tentativa(s).`,
+      }
+    }
+
+    session.isVerified = true
+    localStorage.setItem(FIRST_ACCESS_STORAGE_KEY, JSON.stringify(session))
+    return { success: true }
+  } catch {
+    return { success: false, error: 'Falha ao validar código de segurança.' }
+  }
+}
+
+/**
+ * Conclui a criação da senha corporativa e gera a sessão autenticada imediata
+ */
+export async function completeFirstAccessSetup(
+  token: string,
+  newPassword: string
+): Promise<{ success: boolean; error?: string; company?: ClientCompany; sessionToken?: string }> {
+  try {
+    const raw = localStorage.getItem(FIRST_ACCESS_STORAGE_KEY)
+    if (!raw) {
+      return { success: false, error: 'Sessão de ativação expirada. Reinicie o processo de primeiro acesso.' }
+    }
+
+    const session: FirstAccessSession = JSON.parse(raw)
+    if (session.token !== token || !session.isVerified) {
+      return { success: false, error: 'O código de segurança precisa ser validado antes de criar a senha.' }
+    }
+
+    if (newPassword.length < 6) {
+      return { success: false, error: 'A senha de acesso deve ter no mínimo 6 caracteres.' }
+    }
+
+    const allCompanies = getAllClientCompanies()
+    const company = allCompanies.find((c) => c.id === session.companyId)
+    if (!company) {
+      return { success: false, error: 'Empresa contratante não encontrada na base.' }
+    }
+
+    // Registra acesso por e-mail e por CNPJ limpo para permitir login com ambos
+    await saveNewRegisteredUser({
+      identifier: company.email,
+      name: company.name,
+      companyId: company.id,
+      rawPassword: newPassword,
+    })
+
+    const cleanCnpj = company.cnpj.replace(/\D/g, '')
+    if (cleanCnpj) {
+      await saveNewRegisteredUser({
+        identifier: cleanCnpj,
+        name: company.name,
+        companyId: company.id,
+        rawPassword: newPassword,
+      })
+    }
+
+    // Gera token JWT de sessão para login imediato
+    const sessionToken = await generateSessionToken({
+      userId: `user-${company.id}`,
+      role: 'client',
+      companyId: company.id,
+    })
+
+    localStorage.removeItem(FIRST_ACCESS_STORAGE_KEY)
+    resetFailedLoginAttempts()
+
+    return {
+      success: true,
+      company,
+      sessionToken,
+    }
+  } catch (err: any) {
+    return { success: false, error: `Falha ao ativar conta: ${err?.message || 'Erro inesperado'}` }
   }
 }
 

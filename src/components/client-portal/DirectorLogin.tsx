@@ -10,7 +10,6 @@ import {
   EyeOff,
   AlertTriangle,
   RefreshCw,
-  ExternalLink,
   Building,
 } from 'lucide-react'
 import { BrandMark } from '../BrandMark'
@@ -319,15 +318,9 @@ export function DirectorLogin({
                 <span>Ir para Login de Clientes</span>
               </button>
 
-              <a
-                href="https://app.maquinapro.app.br/#"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-600"
-              >
-                <span>Máquina Pro Direto</span>
-                <ExternalLink size={10} />
-              </a>
+              <span className="text-[11px] text-slate-400 font-medium">
+                Rotta Gestão Pro • v2.5
+              </span>
             </div>
           </div>
         </div>

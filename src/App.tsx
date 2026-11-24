@@ -40,7 +40,12 @@ export default function App() {
         setCurrentPage('produtos')
       } else if (hash === '#/contato') {
         setCurrentPage('contato')
-      } else if (hash === '#/area-cliente') {
+      } else if (
+        hash === '#/area-cliente' ||
+        hash === '#/portal' ||
+        hash === '#/cliente' ||
+        hash === '#/login'
+      ) {
         setCurrentPage('area-cliente')
       } else if (hash === '#/diretoria' || hash === '#/admin' || hash === '#/gestao') {
         setCurrentPage('diretoria')

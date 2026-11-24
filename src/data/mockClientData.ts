@@ -521,13 +521,13 @@ export const DEFAULT_INVOICES: ClientInvoice[] = [
 
 // Storage Keys
 const STORAGE_KEYS = {
-  SESSION: 'rotta_portal_session_v2',
-  COMPANIES: 'rotta_client_companies_v2',
-  TICKETS: 'rotta_client_tickets_v2',
-  EQUIPMENTS: 'rotta_client_equipments_v2',
-  SUPPLIES: 'rotta_client_supplies_v2',
-  COUNTERS: 'rotta_client_counters_v2',
-  INVOICES: 'rotta_client_invoices_v2',
+  SESSION: 'rotta_portal_session_v3',
+  COMPANIES: 'rotta_client_companies_v3',
+  TICKETS: 'rotta_client_tickets_v3',
+  EQUIPMENTS: 'rotta_client_equipments_v3',
+  SUPPLIES: 'rotta_client_supplies_v3',
+  COUNTERS: 'rotta_client_counters_v3',
+  INVOICES: 'rotta_client_invoices_v3',
 }
 
 export function getAllClientCompanies(): ClientCompany[] {

@@ -202,3 +202,29 @@ export const EMAIL_TEMPLATE_PREVIEW_HTML = `
 </body>
 </html>
 `
+
+export interface SendFirstAccessEmailParams {
+  toEmail: string
+  userName: string
+  companyName: string
+  code: string
+  expiresMinutes?: number
+}
+
+/**
+ * Envia o código de ativação e primeiro acesso para o cliente corporativo
+ */
+export async function sendFirstAccessEmail({
+  toEmail,
+  userName,
+  companyName,
+  code,
+  expiresMinutes = 15,
+}: SendFirstAccessEmailParams): Promise<SendEmailResult> {
+  return sendPasswordResetEmail({
+    toEmail,
+    userName: `${userName} (${companyName})`,
+    code,
+    expiresMinutes,
+  })
+}
